@@ -1,0 +1,324 @@
+<script lang="ts">
+  import { onDestroy } from 'svelte';
+  import type { MicropolisSimulator } from '$lib/MicropolisSimulator';
+  import {
+    executeAction,
+    readSnapshot,
+    resetLaboratory,
+    type AgentAction,
+    type AgentSnapshot
+  } from './runtime';
+  import {
+    advanceMemory,
+    decideRules,
+    makeInitialMemory
+  } from './rules.js';
+
+  export let simulator: MicropolisSimulator | null = null;
+
+  let running = false;
+  let prepared = false;
+  let intervalMs = 650;
+  let timer: ReturnType<typeof setInterval> | null = null;
+  let refreshTimer: ReturnType<typeof setInterval> | null = null;
+  let memory = makeInitialMemory();
+  let snapshot: AgentSnapshot | null = null;
+  let lastAction: AgentAction | null = null;
+  let lastResult = '';
+  let history: Array<{ action: AgentAction; result: string }> = [];
+
+  function refresh() {
+    snapshot = readSnapshot(simulator);
+  }
+
+  function prepare() {
+    if (!simulator) return;
+    stop();
+    resetLaboratory(simulator);
+    memory = makeInitialMemory();
+    lastAction = null;
+    lastResult = '';
+    history = [];
+    prepared = true;
+    refresh();
+  }
+
+  function step() {
+    if (!simulator) return;
+    if (!prepared) prepare();
+
+    const current = readSnapshot(simulator);
+    if (!current) return;
+
+    const action = decideRules(current, memory) as AgentAction;
+    const result = executeAction(simulator, action);
+
+    lastAction = action;
+    lastResult = result.message;
+    history = [{ action, result: result.message }, ...history].slice(0, 8);
+    memory = advanceMemory(memory, action);
+    refresh();
+  }
+
+  function start() {
+    if (!simulator || running) return;
+    if (!prepared) prepare();
+    running = true;
+    timer = setInterval(step, intervalMs);
+  }
+
+  function stop() {
+    running = false;
+    if (timer) clearInterval(timer);
+    timer = null;
+  }
+
+  function restartTimer() {
+    if (!running) return;
+    stop();
+    start();
+  }
+
+  $: if (simulator && !refreshTimer) {
+    refresh();
+    refreshTimer = setInterval(refresh, 500);
+  }
+
+  onDestroy(() => {
+    stop();
+    if (refreshTimer) clearInterval(refreshTimer);
+  });
+
+  function fmt(value: number | undefined | null) {
+    return Math.round(Number(value ?? 0)).toLocaleString('pt-BR');
+  }
+
+  function actionLabel(action: AgentAction | null) {
+    if (!action) return 'Aguardando';
+    if (action.kind === 'build') {
+      return String(action.tool).toUpperCase() + ' @ (' + action.x + ', ' + action.y + ')';
+    }
+    if (action.kind === 'tax') return 'Imposto → ' + action.value + '%';
+    return 'Esperar';
+  }
+</script>
+
+<aside class="agent-panel" aria-label="Micropolis Agent Lab">
+  <header>
+    <div>
+      <strong>Agent Lab</strong>
+      <small>Rules · visual</small>
+    </div>
+    <span class:running>{running ? 'RODANDO' : 'PAUSADO'}</span>
+  </header>
+
+  <div class="controls">
+    {#if running}
+      <button on:click={stop}>Pausar</button>
+    {:else}
+      <button class="primary" on:click={start} disabled={!simulator}>Iniciar agente</button>
+    {/if}
+    <button on:click={step} disabled={!simulator || running}>1 passo</button>
+    <button on:click={prepare} disabled={!simulator}>Preparar laboratório</button>
+  </div>
+
+  <label class="speed">
+    Intervalo: {intervalMs} ms
+    <input
+      type="range"
+      min="200"
+      max="2000"
+      step="50"
+      bind:value={intervalMs}
+      on:change={restartTimer}
+    />
+  </label>
+
+  {#if snapshot}
+    <section class="metrics">
+      <div><span>População</span><b>{fmt(snapshot.cityPop)}</b></div>
+      <div><span>Caixa</span><b>${fmt(snapshot.totalFunds)}</b></div>
+      <div><span>Imposto</span><b>{fmt(snapshot.cityTax)}%</b></div>
+      <div><span>Score</span><b>{fmt(snapshot.cityScore)}</b></div>
+      <div><span>R / C / I</span><b>{fmt(snapshot.resValve)} / {fmt(snapshot.comValve)} / {fmt(snapshot.indValve)}</b></div>
+      <div><span>Crime</span><b>{fmt(snapshot.crimeAverage)}</b></div>
+      <div><span>Poluição</span><b>{fmt(snapshot.pollutionAverage)}</b></div>
+      <div><span>Sem energia</span><b>{fmt(snapshot.unpoweredZoneCount)}</b></div>
+    </section>
+  {:else}
+    <p class="muted">Carregando simulador...</p>
+  {/if}
+
+  <section class="decision">
+    <small>DECISÃO #{memory.step}</small>
+    <strong>{actionLabel(lastAction)}</strong>
+    {#if lastAction}
+      <p>{lastAction.reason}</p>
+      <em>{lastResult}</em>
+    {:else}
+      <p>Inicie o agente para preparar a cidade e acompanhar cada ação.</p>
+    {/if}
+  </section>
+
+  {#if history.length}
+    <section class="history">
+      <small>ÚLTIMAS AÇÕES</small>
+      {#each history as item}
+        <div>
+          <b>{actionLabel(item.action)}</b>
+          <span>{item.result}</span>
+        </div>
+      {/each}
+    </section>
+  {/if}
+</aside>
+
+<style>
+  .agent-panel {
+    position: absolute;
+    z-index: 40;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: min(340px, calc(100% - 1.5rem));
+    max-height: calc(100% - 1.5rem);
+    overflow: auto;
+    box-sizing: border-box;
+    padding: 0.9rem;
+    border-radius: 12px;
+    background: rgba(10, 14, 20, 0.94);
+    color: #f4f7fb;
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.36);
+    font: 13px/1.35 system-ui, sans-serif;
+    backdrop-filter: blur(8px);
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.8rem;
+  }
+
+  header div {
+    display: grid;
+  }
+
+  header strong {
+    font-size: 1rem;
+  }
+
+  header small, .muted, section small {
+    color: #9ba7b6;
+  }
+
+  header span {
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    color: #b5bec9;
+  }
+
+  header span.running {
+    color: #8ef0a8;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  button {
+    border: 1px solid #394454;
+    border-radius: 7px;
+    padding: 0.45rem 0.6rem;
+    background: #202936;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  button.primary {
+    background: #294d83;
+  }
+
+  button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .speed {
+    display: grid;
+    gap: 0.25rem;
+    margin: 0.8rem 0;
+    color: #c7d0dc;
+  }
+
+  .speed input {
+    width: 100%;
+  }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.35rem;
+  }
+
+  .metrics div {
+    display: grid;
+    gap: 0.1rem;
+    padding: 0.45rem;
+    background: rgba(255,255,255,0.055);
+    border-radius: 7px;
+  }
+
+  .metrics span {
+    color: #9ba7b6;
+    font-size: 0.72rem;
+  }
+
+  .metrics b {
+    font-size: 0.82rem;
+  }
+
+  .decision {
+    display: grid;
+    gap: 0.3rem;
+    margin-top: 0.8rem;
+    padding: 0.65rem;
+    border-radius: 8px;
+    background: rgba(80, 130, 210, 0.13);
+  }
+
+  .decision p {
+    margin: 0;
+    color: #d5dce5;
+  }
+
+  .decision em {
+    color: #aab6c5;
+    font-style: normal;
+    font-size: 0.75rem;
+  }
+
+  .history {
+    margin-top: 0.8rem;
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .history div {
+    display: grid;
+    padding-top: 0.35rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .history b {
+    font-size: 0.75rem;
+  }
+
+  .history span {
+    color: #99a6b5;
+    font-size: 0.7rem;
+  }
+</style>
