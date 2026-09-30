@@ -6,7 +6,7 @@ function build(tool, x, y, reason, phase = 'blueprint') {
 
 blueprint.push(build('coal', 36, 51, 'Criar a fonte de energia da cidade.'));
 
-for (let x = 39; x <= 74; x += 1) {
+for (let x = 39; x <= 45; x += 1) {
   blueprint.push(build('wire', x, 50, 'Estender a rede elétrica superior.'));
   blueprint.push(build('wire', x, 52, 'Estender a rede elétrica inferior.'));
 }

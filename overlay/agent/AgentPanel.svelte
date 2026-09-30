@@ -67,6 +67,9 @@
 
     lastAction = action;
     lastResult = result.message;
+    if (!result.ok) {
+      lastResult = 'FALHA: ' + result.message + ' (código ' + result.code + ')';
+    }
     history = [{ action, result: result.message }, ...history].slice(0, 8);
     memory = advanceMemory(memory, action);
     refresh();
