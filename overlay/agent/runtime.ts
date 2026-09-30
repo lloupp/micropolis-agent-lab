@@ -5,6 +5,11 @@ import { resolveEditingTool } from '$lib/gameTools';
 export interface AgentSnapshot {
   totalFunds: number;
   cityPop: number;
+  cityTime: number;
+  simCycle: number;
+  resPop: number;
+  comPop: number;
+  indPop: number;
   cityYear: number;
   cityMonth: number;
   cityTax: number;
@@ -49,9 +54,17 @@ export function readSnapshot(simulator: MicropolisSimulator | null): AgentSnapsh
   const m = simulator?.micropolis;
   if (!m) return null;
 
+  const trace = resetTraces.get(simulator!);
+  if (trace && !trace.some(entry => entry.stage === 'AgentPanel')) recordReset(simulator!, 'AgentPanel');
+
   return {
     totalFunds: Number(m.totalFunds),
     cityPop: Number(m.cityPop),
+    cityTime: Number(m.cityTime),
+    simCycle: Number(m.simCycle),
+    resPop: Number(m.resPop),
+    comPop: Number(m.comPop),
+    indPop: Number(m.indPop),
     cityYear: Number(m.cityYear),
     cityMonth: Number(m.cityMonth),
     cityTax: Number(m.cityTax),
@@ -69,22 +82,74 @@ export function readSnapshot(simulator: MicropolisSimulator | null): AgentSnapsh
   };
 }
 
+export interface ResetTraceEntry {
+  stage: string;
+  totalFunds: number;
+  cashFlow: number;
+  cityPop: number;
+  totalPop: number;
+  cityTime: number;
+  simCycle: number;
+  phaseCycle: number;
+  autoBudget: boolean;
+  cityTax: number;
+}
+const resetTraces = new WeakMap<MicropolisSimulator, ResetTraceEntry[]>();
+export function getResetTrace(simulator: MicropolisSimulator): ResetTraceEntry[] {
+  return [...(resetTraces.get(simulator) ?? [])];
+}
+function recordReset(simulator: MicropolisSimulator, stage: string): void {
+  const m = simulator.micropolis!;
+  const entry = { stage, totalFunds: Number(m.totalFunds), cashFlow: Number(m.cashFlow),
+    cityPop: Number(m.cityPop), totalPop: Number(m.totalPop), cityTime: Number(m.cityTime),
+    simCycle: Number(m.simCycle), phaseCycle: Number(m.phaseCycle),
+    autoBudget: Boolean(m.autoBudget), cityTax: Number(m.cityTax) };
+  resetTraces.get(simulator)!.push(entry);
+  console.debug('[Agent Lab reset]', entry);
+}
+
 export function resetLaboratory(simulator: MicropolisSimulator): void {
   const m = simulator.micropolis;
   if (!m) return;
 
+  resetTraces.set(simulator, []);
+  recordReset(simulator, 'before');
+  // setPaused toggles only simPaused and immediately ticks. Stop the engine
+  // via its API first so that tick cannot finish the previous city's budget.
+  m.pause();
   simulator.setPaused(true);
+  // clearMap alone retains census, tax/budget, evaluation and phase state.
+  // init reinitializes all of these in the same engine and preserves callbacks.
+  m.init();
+  m.pause();
   m.clearMap();
+  m.cityPop = 0;
+  m.cityTime = 0;
+  m.simCycle = 0;
+  m.phaseCycle = 0;
+  m.cashFlow = 0;
+  m.seedRandom(42);
   m.totalFunds = 20000;
+  recordReset(simulator, 'assignment');
   m.setCityTax(7);
   m.setEnableDisasters(false);
   m.setAutoBudget(true);
   m.setAutoBulldoze(true);
   m.updateFunds();
+  m.simUpdate();
+  recordReset(simulator, 'updateFunds');
   simulator.syncMapViews();
   simulator.render();
-  simulator.setGameSpeed(3);
+  simulator.setGameSpeed(4);
+  // setPaused(false) restores this cached scheduler rate. Keep it aligned
+  // with the selected speed instead of inheriting the previous city's FPS.
+  simulator.pausedFramesPerSecond = simulator.framesPerSecond;
+  m.resume();
+  m.setSpeed(3);
   simulator.setPaused(false);
+  recordReset(simulator, 'resume/setPaused(false)');
+  simulator.tick();
+  recordReset(simulator, 'after 1 tick');
 }
 
 export function executeAction(
@@ -110,11 +175,12 @@ export function executeAction(
   if (action.kind === 'build') {
     const toolId = action.tool as Parameters<typeof resolveEditingTool>[1];
     const tool = resolveEditingTool(engine, toolId);
-    const result = micropolisReactive.poke.doTool(
+    const result = m.doTool(
       tool,
       Number(action.x),
       Number(action.y)
     );
+    micropolisReactive.syncFromEngine();
     simulator.render();
 
     const code = numberValue(result);

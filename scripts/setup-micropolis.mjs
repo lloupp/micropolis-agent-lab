@@ -35,7 +35,7 @@ run('git', ['fetch', '--depth', '1', 'origin', config.commit], { cwd: micropolis
 run('git', ['checkout', '--detach', 'FETCH_HEAD'], { cwd: micropolis });
 
 console.log('Instalando dependências do MicropolisCore...');
-run('corepack', ['pnpm', 'install', '--frozen-lockfile'], { cwd: micropolis });
+if (!process.argv.includes('--engine-only')) run('corepack', ['pnpm', 'install', '--frozen-lockfile', '--ignore-scripts'], { cwd: micropolis });
 
 console.log('Aplicando Agent Lab...');
 run(process.execPath, [join(root, 'scripts/apply-overlay.mjs')]);

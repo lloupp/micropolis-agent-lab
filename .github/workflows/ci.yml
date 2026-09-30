@@ -11,6 +11,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
       - run: npm test
       - run: npm run check
+      - run: corepack enable
+      - run: npm run setup
+      - run: npm run verify:reset
+      - run: corepack pnpm --filter micropolis check
+        working-directory: .vendor/MicropolisCore
