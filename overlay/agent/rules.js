@@ -6,7 +6,7 @@ function build(tool, x, y, reason, phase = 'blueprint') {
 
 blueprint.push(build('coal', 36, 51, 'Criar a fonte de energia da cidade.'));
 
-for (let x = 40; x <= 74; x += 1) {
+for (let x = 39; x <= 74; x += 1) {
   blueprint.push(build('wire', x, 50, 'Estender a rede elétrica superior.'));
   blueprint.push(build('wire', x, 52, 'Estender a rede elétrica inferior.'));
 }
@@ -38,7 +38,7 @@ const adaptiveSites = [
 export const BLUEPRINT_LENGTH = blueprint.length;
 
 export function makeInitialMemory() {
-  return { step: 0, adaptiveIndex: 0 };
+  return { step: 0, adaptiveIndex: 0, policeBuilt: false };
 }
 
 export function decideRules(snapshot, memory) {
@@ -55,7 +55,7 @@ export function decideRules(snapshot, memory) {
     };
   }
 
-  if (snapshot.crimeAverage > 120 && snapshot.totalFunds >= 700) {
+  if (!memory.policeBuilt && snapshot.crimeAverage > 120 && snapshot.totalFunds >= 700) {
     return build('police', 58, 60, 'Crime elevado: adicionar cobertura policial.', 'adaptive');
   }
 
@@ -99,8 +99,9 @@ export function advanceMemory(memory, action) {
   return {
     step: memory.step + 1,
     adaptiveIndex:
-      action.phase === 'adaptive' && action.kind === 'build'
+      action.phase === 'adaptive' && action.kind === 'build' && action.tool !== 'police'
         ? memory.adaptiveIndex + 1
-        : memory.adaptiveIndex
+        : memory.adaptiveIndex,
+    policeBuilt: memory.policeBuilt || (action.kind === 'build' && action.tool === 'police')
   };
 }
