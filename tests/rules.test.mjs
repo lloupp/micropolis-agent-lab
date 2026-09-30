@@ -32,6 +32,13 @@ test('blueprint começa pela usina', () => {
   assert.equal(action.y, 51);
 });
 
+test('rede elétrica começa adjacente à usina', () => {
+  const action = decideRules(base, { step: 1, adaptiveIndex: 0, policeBuilt: false });
+  assert.equal(action.kind, 'build');
+  assert.equal(action.tool, 'wire');
+  assert.equal(action.x, 39);
+});
+
 test('memória avança deterministicamente', () => {
   const memory = makeInitialMemory();
   const action = decideRules(base, memory);
@@ -47,6 +54,24 @@ test('após blueprint caixa baixo aumenta imposto', () => {
   );
   assert.equal(action.kind, 'tax');
   assert.equal(action.value, 8);
+});
+
+test('delegacia não entra em loop', () => {
+  const action = decideRules(
+    { ...base, crimeAverage: 150 },
+    { step: BLUEPRINT_LENGTH, adaptiveIndex: 0, policeBuilt: false }
+  );
+  assert.equal(action.tool, 'police');
+  const next = advanceMemory(
+    { step: BLUEPRINT_LENGTH, adaptiveIndex: 0, policeBuilt: false },
+    action
+  );
+  assert.equal(next.policeBuilt, true);
+  const second = decideRules(
+    { ...base, crimeAverage: 150 },
+    next
+  );
+  assert.notEqual(second.tool, 'police');
 });
 
 test('após blueprint escolhe maior demanda', () => {
