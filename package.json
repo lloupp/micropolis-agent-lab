@@ -4,13 +4,16 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "scripts": {
     "setup": "node scripts/setup-micropolis.mjs",
     "overlay": "node scripts/apply-overlay.mjs",
     "dev": "node scripts/dev.mjs",
     "test": "node --test",
-    "check": "node --check scripts/setup-micropolis.mjs && node --check scripts/apply-overlay.mjs && node --check scripts/dev.mjs && node --check overlay/agent/rules.js && node --test"
+    "check": "node --check scripts/setup-micropolis.mjs && node --check scripts/apply-overlay.mjs && node --check scripts/dev.mjs && node --check overlay/agent/rules.js && node --test",
+    "verify:reset": "node scripts/verify-reset.mjs",
+    "verify:cycle": "node scripts/verify-cycle.mjs",
+    "smoke": "node scripts/smoke.mjs"
   }
 }

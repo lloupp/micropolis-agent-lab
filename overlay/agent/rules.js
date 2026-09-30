@@ -1,39 +1,37 @@
+/** @typedef {import('./runtime').AgentAction} AgentAction */
+/** @typedef {{step: number, adaptiveIndex: number, policeBuilt: boolean}} AgentMemory */
+/** @type {AgentAction[]} */
 const blueprint = [];
 
+/**
+ * @param {string} tool
+ * @param {number} x
+ * @param {number} y
+ * @param {string} reason
+ * @param {string} phase
+ * @returns {AgentAction}
+ */
 function build(tool, x, y, reason, phase = 'blueprint') {
   return { kind: 'build', tool, x, y, reason, phase };
 }
 
 blueprint.push(build('coal', 36, 51, 'Criar a fonte de energia da cidade.'));
 
-for (let x = 39; x <= 74; x += 1) {
-  blueprint.push(build('wire', x, 50, 'Estender a rede elétrica superior.'));
-  blueprint.push(build('wire', x, 52, 'Estender a rede elétrica inferior.'));
+// A compact, contiguous district lets zoning conduct power between neighbors.
+// Finish R/C/I early enough for growth during the first 100 decisions.
+for (let x = 39; x <= 41; x += 1) {
+  blueprint.push(build('wire', x, 50, 'Conectar a usina ao primeiro distrito.'));
 }
-
-for (let x = 40; x <= 74; x += 1) {
-  blueprint.push(build('road', x, 46, 'Construir o corredor viário superior.'));
-  blueprint.push(build('road', x, 56, 'Construir o corredor viário inferior.'));
+for (let x = 40; x <= 67; x += 1) {
+  blueprint.push(build('road', x, 46, 'Construir acesso para zonas contíguas.'));
 }
-
-for (const x of [42, 46]) {
-  blueprint.push(build('ind', x, 48, 'Criar empregos industriais perto da infraestrutura.'));
-  blueprint.push(build('ind', x, 54, 'Expandir empregos industriais.'));
+/** @type {Array<[string, number]>} */
+const initialZones = [['ind', 42], ['ind', 45], ['com', 48],
+  ['res', 51], ['res', 54], ['res', 57], ['res', 60]];
+for (const [tool, x] of initialZones) {
+  blueprint.push(build(tool, x, 48, 'Criar zona ligada à via e à rede elétrica.'));
 }
-
-blueprint.push(build('com', 54, 48, 'Criar núcleo comercial.'));
-blueprint.push(build('com', 54, 54, 'Expandir núcleo comercial.'));
-
-for (const x of [62, 66, 70]) {
-  blueprint.push(build('res', x, 48, 'Criar área residencial conectada.'));
-  blueprint.push(build('res', x, 54, 'Expandir área residencial conectada.'));
-}
-
-const adaptiveSites = [
-  [50, 48], [50, 54],
-  [58, 48], [58, 54],
-  [74, 48], [74, 54]
-];
+const adaptiveSites = [[63, 48], [66, 48]];
 
 export const BLUEPRINT_LENGTH = blueprint.length;
 
@@ -41,6 +39,10 @@ export function makeInitialMemory() {
   return { step: 0, adaptiveIndex: 0, policeBuilt: false };
 }
 
+/** @param {import('./runtime').AgentSnapshot} snapshot
+ * @param {AgentMemory} memory
+ * @returns {AgentAction}
+ */
 export function decideRules(snapshot, memory) {
   if (memory.step < blueprint.length) {
     return blueprint[memory.step];
@@ -56,7 +58,7 @@ export function decideRules(snapshot, memory) {
   }
 
   if (!memory.policeBuilt && snapshot.crimeAverage > 120 && snapshot.totalFunds >= 700) {
-    return build('police', 58, 60, 'Crime elevado: adicionar cobertura policial.', 'adaptive');
+    return build('police', 54, 51, 'Crime elevado: adicionar cobertura policial.', 'adaptive');
   }
 
   if (memory.adaptiveIndex < adaptiveSites.length && snapshot.totalFunds >= 500) {
@@ -95,6 +97,10 @@ export function decideRules(snapshot, memory) {
   };
 }
 
+/** @param {AgentMemory} memory
+ * @param {AgentAction} action
+ * @returns {AgentMemory}
+ */
 export function advanceMemory(memory, action) {
   return {
     step: memory.step + 1,
