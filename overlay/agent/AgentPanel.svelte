@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import type { MicropolisSimulator } from '$lib/MicropolisSimulator';
   import {
     executeAction,
@@ -14,7 +14,7 @@
     makeInitialMemory
   } from './rules.js';
 
-  export let simulator: MicropolisSimulator | null = null;
+  export let getSimulator: () => MicropolisSimulator | null = () => null;
 
   let running = false;
   let prepared = false;
@@ -23,16 +23,24 @@
   let refreshTimer: ReturnType<typeof setInterval> | null = null;
   let memory = makeInitialMemory();
   let snapshot: AgentSnapshot | null = null;
+  let ready = false;
   let lastAction: AgentAction | null = null;
   let lastResult = '';
   let history: Array<{ action: AgentAction; result: string }> = [];
 
+  function currentSimulator(): MicropolisSimulator | null {
+    return getSimulator?.() ?? null;
+  }
+
   function refresh() {
+    const simulator = currentSimulator();
+    ready = !!simulator?.micropolis;
     snapshot = readSnapshot(simulator);
   }
 
   function prepare() {
-    if (!simulator) return;
+    const simulator = currentSimulator();
+    if (!simulator?.micropolis) return;
     stop();
     resetLaboratory(simulator);
     memory = makeInitialMemory();
@@ -44,7 +52,11 @@
   }
 
   function step() {
-    if (!simulator) return;
+    const simulator = currentSimulator();
+    if (!simulator?.micropolis) {
+      refresh();
+      return;
+    }
     if (!prepared) prepare();
 
     const current = readSnapshot(simulator);
@@ -61,7 +73,11 @@
   }
 
   function start() {
-    if (!simulator || running) return;
+    const simulator = currentSimulator();
+    if (!simulator?.micropolis || running) {
+      refresh();
+      return;
+    }
     if (!prepared) prepare();
     running = true;
     timer = setInterval(step, intervalMs);
@@ -79,10 +95,10 @@
     start();
   }
 
-  $: if (simulator && !refreshTimer) {
+  onMount(() => {
     refresh();
-    refreshTimer = setInterval(refresh, 500);
-  }
+    refreshTimer = setInterval(refresh, 250);
+  });
 
   onDestroy(() => {
     stop();
@@ -116,10 +132,10 @@
     {#if running}
       <button on:click={stop}>Pausar</button>
     {:else}
-      <button class="primary" on:click={start} disabled={!simulator}>Iniciar agente</button>
+      <button class="primary" on:click={start} disabled={!ready}>Iniciar agente</button>
     {/if}
-    <button on:click={step} disabled={!simulator || running}>1 passo</button>
-    <button on:click={prepare} disabled={!simulator}>Preparar laboratório</button>
+    <button on:click={step} disabled={!ready || running}>1 passo</button>
+    <button on:click={prepare} disabled={!ready}>Preparar laboratório</button>
   </div>
 
   <label class="speed">
