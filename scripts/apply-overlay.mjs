@@ -27,7 +27,11 @@ if (!view.includes(importLine)) {
   view = view.replace(anchor, anchor + '\n' + importLine);
 }
 
-const panelLine = '    <AgentPanel simulator={micropolisSimulator} />';
+const legacyPanelLine = '    <AgentPanel simulator={micropolisSimulator} />';
+const panelLine = '    <AgentPanel getSimulator={() => micropolisSimulator} />';
+if (view.includes(legacyPanelLine)) {
+  view = view.replace(legacyPanelLine, panelLine);
+}
 if (!view.includes(panelLine)) {
   const anchor = '    <MessageOverlay />';
   if (!view.includes(anchor)) {
