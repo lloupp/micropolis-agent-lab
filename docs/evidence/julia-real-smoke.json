@@ -1,0 +1,87 @@
+{
+  "source": "real",
+  "endpoint": "http://127.0.0.1:8765/decide",
+  "provenance": {
+    "modelId": "SupersonicLabs/Julia-1",
+    "revision": "a85b127321d580d65176c89ced8273f305745d85",
+    "weightsSha256": "df853bf7fe424420011f3d0c47a05d7341aa9eefa7fb9f203ea4aada4ad95b72",
+    "provider": "julia-python",
+    "device": "cpu",
+    "instanceId": "7f8b956d-9a92-4e97-a255-9f1ca2adec1c",
+    "hardware": "x86_64",
+    "torch": "2.14.1+cpu",
+    "transformers": "5.0.0",
+    "inference": true,
+    "requestId": 1
+  },
+  "latencyMs": 185.677485,
+  "normalizedDecision": {
+    "actionId": "build:res:10:10",
+    "confidence": 0.9393356648000987
+  },
+  "candidate": {
+    "id": "build:res:10:10",
+    "action": {
+      "kind": "build",
+      "tool": "res",
+      "x": 10,
+      "y": 10,
+      "reason": ""
+    }
+  },
+  "snapshot": {
+    "cityPop": 0,
+    "totalFunds": 20000,
+    "cityTax": 7,
+    "cityTime": 1,
+    "simCycle": 1,
+    "cityYear": 1900,
+    "cityMonth": 0,
+    "cityScore": 0,
+    "resValve": 2000,
+    "comValve": -600,
+    "indValve": 600,
+    "resPop": 0,
+    "comPop": 0,
+    "indPop": 0,
+    "crimeAverage": 0,
+    "pollutionAverage": 0,
+    "trafficAverage": 0,
+    "landValueAverage": 0,
+    "poweredZoneCount": 0,
+    "unpoweredZoneCount": 0,
+    "cashFlow": 0,
+    "lastActions": [],
+    "lastActionResult": null,
+    "recentFailures": []
+  },
+  "candidates": [
+    {
+      "id": "build:coal:36:51",
+      "action": {
+        "kind": "build",
+        "tool": "coal",
+        "x": 36,
+        "y": 51,
+        "reason": ""
+      }
+    },
+    {
+      "id": "build:res:10:10",
+      "action": {
+        "kind": "build",
+        "tool": "res",
+        "x": 10,
+        "y": 10,
+        "reason": ""
+      }
+    },
+    {
+      "id": "wait",
+      "action": {
+        "kind": "wait",
+        "reason": ""
+      }
+    }
+  ]
+}
