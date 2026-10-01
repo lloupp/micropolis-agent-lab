@@ -13,7 +13,12 @@ export function availableActionsFor(snapshot, rulesAction, isLegalBuild = () => 
     const id = actionId(action);
     if (id && !actions.some((item) => item.id === id)) actions.push({ id, action });
   };
-  add(rulesAction);
+  const rulesActionIsLegal = rulesAction.kind === 'build'
+    ? isLegalBuild(rulesAction)
+    : rulesAction.kind === 'wait' ||
+      (rulesAction.kind === 'tax' && Number.isInteger(rulesAction.value) &&
+       rulesAction.value >= 0 && rulesAction.value <= 20);
+  if (rulesActionIsLegal) add(rulesAction);
   const constructionTools = ['res', 'com', 'ind', 'road', 'wire', 'police', 'fire'];
   const sites = [];
   for (let y = 10; y <= 90; y += 4) {
