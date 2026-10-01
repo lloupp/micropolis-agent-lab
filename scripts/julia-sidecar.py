@@ -6,9 +6,21 @@ from urllib.request import Request, urlopen
 
 
 class Handler(BaseHTTPRequestHandler):
+    def allowed_origin(self):
+        origin = self.headers.get("Origin")
+        allowed = os.environ.get(
+            "JULIA_SHADOW_ALLOWED_ORIGINS",
+            "http://localhost:5173,http://127.0.0.1:5173",
+        ).split(",")
+        return origin if origin and origin in [item.strip() for item in allowed] else None
+
     def do_POST(self):
         if self.path != "/decide":
             self.send_error(404)
+            return
+        origin = self.allowed_origin()
+        if self.headers.get("Origin") and not origin:
+            self.send_error(403)
             return
         try:
             payload = json.loads(self.rfile.read(int(self.headers.get("Content-Length", "0"))))
@@ -47,8 +59,12 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json(502, {"error": type(error).__name__})
 
     def do_OPTIONS(self):
+        origin = self.allowed_origin()
+        if not origin:
+            self.send_error(403)
+            return
         self.send_response(204)
-        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Origin", origin)
         self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
@@ -57,7 +73,9 @@ class Handler(BaseHTTPRequestHandler):
         body = json.dumps(value).encode()
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
-        self.send_header("Access-Control-Allow-Origin", "*")
+        origin = self.allowed_origin()
+        if origin:
+            self.send_header("Access-Control-Allow-Origin", origin)
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
