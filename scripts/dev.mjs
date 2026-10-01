@@ -17,11 +17,12 @@ const overlay = spawnSync(process.execPath, [join(root, 'scripts/apply-overlay.m
 });
 if (overlay.status !== 0) process.exit(overlay.status ?? 1);
 
-console.log('Abrindo Micropolis Agent Lab em http://127.0.0.1:5173');
+const port = process.env.VITE_PORT ?? '5177';
+console.log(`Abrindo Micropolis Agent Lab em http://127.0.0.1:${port}`);
 
 const child = spawn(
   'corepack',
-  ['pnpm', '--filter', 'micropolis', 'dev', '--host', '127.0.0.1'],
+  ['pnpm', '--filter', 'micropolis', 'dev:vite', '--', '--host', '127.0.0.1'],
   {
     cwd: upstream,
     stdio: 'inherit',

@@ -19,3 +19,12 @@ test('overlay migra a injeção antiga sem duplicar AgentPanel', async () => {
   assert.match(source, /getSimulator=\{\(\) => micropolisSimulator\}/);
   assert.match(source, /view\.replace\(legacyPanelLine, panelLine\)/);
 });
+
+
+test('servidor visual usa WASM versionado sem iniciar recompilação do motor', async () => {
+  const source = await readFile(new URL('../scripts/dev.mjs', import.meta.url), 'utf8');
+
+  assert.match(source, /dev:vite/);
+  assert.doesNotMatch(source, /'micropolis', 'dev'/);
+  assert.match(source, /VITE_PORT/);
+});
