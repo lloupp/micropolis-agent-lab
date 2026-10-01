@@ -64,32 +64,20 @@ podem inventar comandos nem coordenadas. No modo shadow, Rules executa primeiro
 e continua sendo o único executor. Falha, timeout ou indisponibilidade do serviço
 é registrada com fallback para a decisão Rules, sem pausar o simulador.
 
-Julia-1 conecta pelo sidecar local (`npm run julia:sidecar`) configurado por
-`JULIA_1_BASE_URL`, `JULIA_1_MODEL` e opcionalmente `JULIA_1_API_KEY`. O cliente
-do navegador só envia snapshot, candidatos e memória; credenciais ficam no
-sidecar. Sem endpoint configurado, o laboratório continua em Rules e registra
-Julia como indisponível. `npm run verify:julia-shadow` executa 100 decisões
-WASM reproduzíveis com mock determinístico, produzindo `artifacts/julia-shadow.jsonl`
-e um resumo JSON. O mock não é apresentado como inferência real de Julia-1.
+Julia-1 usa o runtime nativo `SupersonicLabs/Julia-1` (144M parâmetros, escolha
+finita), não uma API de chat. Modelo/revisão/SHA-256 ficam em
+`overlay/agent/julia-model.json`. O sidecar verifica os pesos ao iniciar e cada
+resposta carrega a identidade e um contador de inferência. O cliente rejeita
+respostas sem essa identidade. Isso confirma o runtime local controlado; um
+endpoint externo precisa ser operado por alguém confiável, pois a identidade
+HTTP não constitui prova criptográfica de execução remota.
 
-O snapshot enviado ao modelo inclui população R/C/I, caixa, imposto, tempo,
-demanda, condições da cidade, zonas energizadas, cash flow, últimas ações,
-resultado recente e falhas recentes. Registros anotam validação, concordância,
-latência, loops e resultado real da ação Rules.
+O observer recebe cópias de snapshot/candidatos/resultado Rules, sem referência
+ao engine. Rules executa imediatamente; a fila de inferência não bloqueia o
+simulador. Reset cancela respostas da execução anterior. Falhas de preparação,
+rede, contexto e modelo produzem registros recuperáveis. Nenhuma sugestão Julia
+é executada. O headless usa o mesmo observer do painel.
 
-## Métricas planejadas
-
-- população final;
-- crescimento;
-- caixa final;
-- fluxo de caixa;
-- city score;
-- crime;
-- poluição;
-- trânsito;
-- zonas energizadas;
-- ações inválidas;
-- falhas de construção;
-- tempo por decisão;
-- quantidade de decisões;
-- loops/fallbacks.
+Veja [JULIA.md](JULIA.md) para instalação e benchmark real. O mock é exclusivo
+de testes, opt-in por `--mock`, com diretório separado e agregação que rejeita
+fontes misturadas.
