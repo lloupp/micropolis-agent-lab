@@ -15,11 +15,8 @@
     makeInitialMemory
   } from './rules.js';
   import { availableActionsFor } from './candidates.js';
-  import { decide as decideJulia } from './julia-client.js';
-  import {
-    advanceJuliaMemory, createJuliaMemory, createShadowRecord, ruleDecision,
-    summarizeShadow, validateJuliaDecision
-  } from './agents.js';
+  import { createShadowObserver } from './shadow-observer.js';
+  import { actionId, summarizeShadow } from './agents.js';
 
   export let getSimulator: () => MicropolisSimulator | null = () => null;
 
@@ -35,11 +32,8 @@
   let lastResult = '';
   let history: Array<{ action: AgentAction; result: string }> = [];
   let failures: string[] = [];
-  let shadowRecords: Array<ReturnType<typeof createShadowRecord>> = [];
-  let shadowMemory = createJuliaMemory();
-  let shadowQueue = Promise.resolve();
   let shadowSummary = summarizeShadow([]);
-  let shadowRun = 0;
+  let shadowObserver = createShadowObserver({ onRecord: (rows) => { shadowSummary = summarizeShadow(rows); } });
 
   function currentSimulator(): MicropolisSimulator | null {
     return getSimulator?.() ?? null;
@@ -60,11 +54,9 @@
     lastAction = null;
     lastResult = '';
     history = [];
-    shadowRun += 1;
     failures = [];
-    shadowRecords = [];
-    shadowMemory = createJuliaMemory();
-    shadowQueue = Promise.resolve();
+    shadowObserver.cancel();
+    shadowObserver = createShadowObserver({ onRecord: (rows) => { shadowSummary = summarizeShadow(rows); } });
     shadowSummary = summarizeShadow([]);
     prepared = true;
     refresh();
@@ -82,8 +74,11 @@
     if (!current) return;
 
     const action = decideRules(current, memory) as AgentAction;
-    const candidates = availableActionsFor(current, action, (candidate) => isLegalBuildCandidate(simulator, candidate));
-    const selectedByRules = ruleDecision(current, candidates, memory, decideRules);
+    let candidates: ReturnType<typeof availableActionsFor> = [];
+    let preparationError: string | null = null;
+    try { candidates = availableActionsFor(current, action, (candidate) => isLegalBuildCandidate(simulator, candidate)); }
+    catch { preparationError = 'candidate_preparation_error'; }
+    const selectedByRules = { actionId: actionId(action) };
     const priorHistory = history;
     const priorLastResult = lastResult;
     const priorFailures = failures;
@@ -108,36 +103,8 @@
       recentFailures: [...priorFailures]
     };
     const decisionNumber = memory.step + 1;
-    const runId = shadowRun;
-    // Enqueue after Rules executed. The promise never gates or changes the game action.
-    shadowQueue = shadowQueue.then(async () => {
-      const reply = await decideJulia(modelSnapshot, candidates, shadowMemory);
-      const validation = reply.status === 'response'
-        ? validateJuliaDecision(reply.output, candidates)
-        : { status: reply.status, reason: reply.status, candidate: null };
-      const rawDecision = reply.status === 'response'
-        ? reply.output as { confidence?: number } | null
-        : null;
-      const row = createShadowRecord({
-        decision: decisionNumber, snapshot: modelSnapshot, rulesDecision: selectedByRules,
-        rulesResult: result, validation,
-        rawDecision, latencyMs: reply.latencyMs, previousRecords: shadowRecords
-      });
-      if (runId !== shadowRun) return;
-      shadowRecords = [...shadowRecords, row];
-      shadowSummary = summarizeShadow(shadowRecords);
-      shadowMemory = advanceJuliaMemory(shadowMemory, row.juliaActionId);
-    }).catch(() => {
-      const row = createShadowRecord({
-        decision: decisionNumber, snapshot: modelSnapshot, rulesDecision: selectedByRules,
-        rulesResult: result,
-        validation: { status: 'unavailable', reason: 'client_error', candidate: null },
-        latencyMs: 0, previousRecords: shadowRecords
-      });
-      if (runId !== shadowRun) return;
-      shadowRecords = [...shadowRecords, row];
-      shadowSummary = summarizeShadow(shadowRecords);
-    });
+    shadowObserver.enqueue({ decision: decisionNumber, snapshot: modelSnapshot, candidates,
+      rulesDecision: selectedByRules, rulesResult: result, preparationError });
     memory = advanceMemory(memory, action);
     refresh();
   }
@@ -172,6 +139,7 @@
 
   onDestroy(() => {
     stop();
+    shadowObserver.cancel();
     if (refreshTimer) clearInterval(refreshTimer);
   });
 
@@ -249,6 +217,7 @@
   <section class="decision shadow">
     <small>JULIA-1 · SHADOW (SEM EXECUÇÃO)</small>
     <div>{shadowSummary.decisions} avaliadas · {shadowSummary.valid} válidas · {shadowSummary.invalid} inválidas</div>
+    <div>{shadowSummary.realInferences} inferências reais · {shadowSummary.timeouts} timeouts · {shadowSummary.errors} erros</div>
     <div>Concordância: {shadowSummary.agreementRate === null ? '—' : Math.round(shadowSummary.agreementRate * 100) + '%'}</div>
     <div>Loops possíveis: {shadowSummary.possibleLoops} · p95: {fmt(shadowSummary.latencyMs.p95)} ms</div>
   </section>
