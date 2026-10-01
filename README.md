@@ -12,12 +12,13 @@ O projeto usa o MicropolisCore como simulador e injeta um painel de agente na in
 - Painel com população, caixa, imposto, demandas R/C/I, crime, poluição e energia.
 - Histórico das últimas decisões e resultado de cada ação.
 - Cidade inicial determinística para facilitar comparação entre agentes.
-- Estrutura preparada para NanoAndy, Laya e Julia-1.
+- Julia-1 real em shadow mode, com Rules como único executor.
+- [Instalação e benchmark Julia-1](docs/JULIA.md).
 
 ## Requisitos
 
 - Git
-- Node.js 20+
+- Node.js 24+
 - Corepack/pnpm
 
 O Emscripten só é necessário se você quiser recompilar o motor C++/WASM. O fluxo normal usa os artefatos WASM já versionados no MicropolisCore.

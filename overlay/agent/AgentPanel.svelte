@@ -5,6 +5,7 @@
     executeAction,
     readSnapshot,
     resetLaboratory,
+    isLegalBuildCandidate,
     type AgentAction,
     type AgentSnapshot
   } from './runtime';
@@ -13,6 +14,9 @@
     decideRules,
     makeInitialMemory
   } from './rules.js';
+  import { availableActionsFor } from './candidates.js';
+  import { createShadowObserver } from './shadow-observer.js';
+  import { actionId, summarizeShadow } from './agents.js';
 
   export let getSimulator: () => MicropolisSimulator | null = () => null;
 
@@ -27,6 +31,9 @@
   let lastAction: AgentAction | null = null;
   let lastResult = '';
   let history: Array<{ action: AgentAction; result: string }> = [];
+  let failures: string[] = [];
+  let shadowSummary = summarizeShadow([]);
+  let shadowObserver = createShadowObserver({ onRecord: (rows) => { shadowSummary = summarizeShadow(rows); } });
 
   function currentSimulator(): MicropolisSimulator | null {
     return getSimulator?.() ?? null;
@@ -47,6 +54,10 @@
     lastAction = null;
     lastResult = '';
     history = [];
+    failures = [];
+    shadowObserver.cancel();
+    shadowObserver = createShadowObserver({ onRecord: (rows) => { shadowSummary = summarizeShadow(rows); } });
+    shadowSummary = summarizeShadow([]);
     prepared = true;
     refresh();
   }
@@ -63,6 +74,14 @@
     if (!current) return;
 
     const action = decideRules(current, memory) as AgentAction;
+    let candidates: ReturnType<typeof availableActionsFor> = [];
+    let preparationError: string | null = null;
+    try { candidates = availableActionsFor(current, action, (candidate) => isLegalBuildCandidate(simulator, candidate)); }
+    catch { preparationError = 'candidate_preparation_error'; }
+    const selectedByRules = { actionId: actionId(action) };
+    const priorHistory = history;
+    const priorLastResult = lastResult;
+    const priorFailures = failures;
     const result = executeAction(simulator, action);
 
     lastAction = action;
@@ -71,6 +90,21 @@
       lastResult = 'FALHA: ' + result.message + ' (código ' + result.code + ')';
     }
     history = [{ action, result: result.message }, ...history].slice(0, 8);
+    if (!result.ok) failures = [result.message, ...failures].slice(0, 5);
+    const modelSnapshot = {
+      ...current,
+      lastActions: priorHistory.map(({ action: recent, result: outcome }) => ({
+        actionId: recent.kind === 'build'
+          ? `build:${recent.tool}:${recent.x}:${recent.y}`
+          : recent.kind === 'tax' ? `tax:${recent.value}` : 'wait',
+        result: outcome
+      })),
+      lastActionResult: priorLastResult,
+      recentFailures: [...priorFailures]
+    };
+    const decisionNumber = memory.step + 1;
+    shadowObserver.enqueue({ decision: decisionNumber, snapshot: modelSnapshot, candidates,
+      rulesDecision: selectedByRules, rulesResult: result, preparationError });
     memory = advanceMemory(memory, action);
     refresh();
   }
@@ -105,6 +139,7 @@
 
   onDestroy(() => {
     stop();
+    shadowObserver.cancel();
     if (refreshTimer) clearInterval(refreshTimer);
   });
 
@@ -177,6 +212,14 @@
     {:else}
       <p>Inicie o agente para preparar a cidade e acompanhar cada ação.</p>
     {/if}
+  </section>
+
+  <section class="decision shadow">
+    <small>JULIA-1 · SHADOW (SEM EXECUÇÃO)</small>
+    <div>{shadowSummary.decisions} avaliadas · {shadowSummary.valid} válidas · {shadowSummary.invalid} inválidas</div>
+    <div>{shadowSummary.realInferences} inferências reais · {shadowSummary.timeouts} timeouts · {shadowSummary.errors} erros</div>
+    <div>Concordância: {shadowSummary.agreementRate === null ? '—' : Math.round(shadowSummary.agreementRate * 100) + '%'}</div>
+    <div>Loops possíveis: {shadowSummary.possibleLoops} · p95: {fmt(shadowSummary.latencyMs.p95)} ms</div>
   </section>
 
   {#if history.length}

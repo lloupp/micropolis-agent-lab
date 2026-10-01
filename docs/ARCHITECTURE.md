@@ -54,25 +54,30 @@ A comparação futura deve manter:
 
 ## Interface futura de modelos
 
-Cada modelo deverá implementar semanticamente:
+O contrato comum é:
 
-    decide(snapshot, availableActions, memory) -> action
+    decide(snapshot, availableActions, memory) -> decision
 
-A validação e a execução continuam fora do modelo.
+`overlay/agent/agents.js` valida a resposta por ID exato em `availableActions`.
+O candidato inclui a ação estruturada já criada pelo laboratório; respostas não
+podem inventar comandos nem coordenadas. No modo shadow, Rules executa primeiro
+e continua sendo o único executor. Falha, timeout ou indisponibilidade do serviço
+é registrada com fallback para a decisão Rules, sem pausar o simulador.
 
-## Métricas planejadas
+Julia-1 usa o runtime nativo `SupersonicLabs/Julia-1` (144M parâmetros, escolha
+finita), não uma API de chat. Modelo/revisão/SHA-256 ficam em
+`overlay/agent/julia-model.json`. O sidecar verifica os pesos ao iniciar e cada
+resposta carrega a identidade e um contador de inferência. O cliente rejeita
+respostas sem essa identidade. Isso confirma o runtime local controlado; um
+endpoint externo precisa ser operado por alguém confiável, pois a identidade
+HTTP não constitui prova criptográfica de execução remota.
 
-- população final;
-- crescimento;
-- caixa final;
-- fluxo de caixa;
-- city score;
-- crime;
-- poluição;
-- trânsito;
-- zonas energizadas;
-- ações inválidas;
-- falhas de construção;
-- tempo por decisão;
-- quantidade de decisões;
-- loops/fallbacks.
+O observer recebe cópias de snapshot/candidatos/resultado Rules, sem referência
+ao engine. Rules executa imediatamente; a fila de inferência não bloqueia o
+simulador. Reset cancela respostas da execução anterior. Falhas de preparação,
+rede, contexto e modelo produzem registros recuperáveis. Nenhuma sugestão Julia
+é executada. O headless usa o mesmo observer do painel.
+
+Veja [JULIA.md](JULIA.md) para instalação e benchmark real. O mock é exclusivo
+de testes, opt-in por `--mock`, com diretório separado e agregação que rejeita
+fontes misturadas.
