@@ -54,11 +54,28 @@ A comparação futura deve manter:
 
 ## Interface futura de modelos
 
-Cada modelo deverá implementar semanticamente:
+O contrato comum é:
 
-    decide(snapshot, availableActions, memory) -> action
+    decide(snapshot, availableActions, memory) -> decision
 
-A validação e a execução continuam fora do modelo.
+`overlay/agent/agents.js` valida a resposta por ID exato em `availableActions`.
+O candidato inclui a ação estruturada já criada pelo laboratório; respostas não
+podem inventar comandos nem coordenadas. No modo shadow, Rules executa primeiro
+e continua sendo o único executor. Falha, timeout ou indisponibilidade do serviço
+é registrada com fallback para a decisão Rules, sem pausar o simulador.
+
+Julia-1 conecta pelo sidecar local (`npm run julia:sidecar`) configurado por
+`JULIA_1_BASE_URL`, `JULIA_1_MODEL` e opcionalmente `JULIA_1_API_KEY`. O cliente
+do navegador só envia snapshot, candidatos e memória; credenciais ficam no
+sidecar. Sem endpoint configurado, o laboratório continua em Rules e registra
+Julia como indisponível. `npm run verify:julia-shadow` executa 100 decisões
+WASM reproduzíveis com mock determinístico, produzindo `artifacts/julia-shadow.jsonl`
+e um resumo JSON. O mock não é apresentado como inferência real de Julia-1.
+
+O snapshot enviado ao modelo inclui população R/C/I, caixa, imposto, tempo,
+demanda, condições da cidade, zonas energizadas, cash flow, últimas ações,
+resultado recente e falhas recentes. Registros anotam validação, concordância,
+latência, loops e resultado real da ação Rules.
 
 ## Métricas planejadas
 
