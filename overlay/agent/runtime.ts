@@ -1,6 +1,6 @@
 import type { MicropolisSimulator } from '$lib/MicropolisSimulator';
 import { micropolisReactive } from '$lib/MicropolisReactive.svelte';
-import { resolveEditingTool } from '$lib/gameTools';
+import { GAME_TOOLS, resolveEditingTool, toolFootprintAtCenter } from '$lib/gameTools';
 
 export interface AgentSnapshot {
   totalFunds: number;
@@ -40,6 +40,27 @@ export interface ExecutionResult {
   ok: boolean;
   code: number | null;
   message: string;
+}
+
+/** Checks placement constraints before exposing a build to any shadow agent. */
+export function isLegalBuildCandidate(simulator: MicropolisSimulator, action: AgentAction): boolean {
+  const m = simulator.micropolis;
+  const engine = simulator.micropolisengine;
+  if (!m || !engine || action.kind !== 'build' || !action.tool ||
+      !Number.isInteger(action.x) || !Number.isInteger(action.y)) return false;
+  const tool = GAME_TOOLS.find((item) => item.id === action.tool);
+  if (!tool || m.totalFunds < tool.cost) return false;
+  const footprint = toolFootprintAtCenter(action.x!, action.y!, action.tool as Parameters<typeof toolFootprintAtCenter>[2]);
+  const worldWidth = Number(engine.WORLD_W ?? 120);
+  const worldHeight = Number(engine.WORLD_H ?? 100);
+  if (footprint.x < 0 || footprint.y < 0 || footprint.x + footprint.w > worldWidth ||
+      footprint.y + footprint.h > worldHeight) return false;
+  for (let y = footprint.y; y < footprint.y + footprint.h; y += 1) {
+    for (let x = footprint.x; x < footprint.x + footprint.w; x += 1) {
+      if ((m.getTile(x, y) & 0x03ff) !== 0) return false;
+    }
+  }
+  return true;
 }
 
 function numberValue(value: unknown): number {
