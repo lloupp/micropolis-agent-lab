@@ -2,8 +2,8 @@
 /** @typedef {import('./runtime').AgentSnapshot} AgentSnapshot */
 /** @typedef {{id: string, action: AgentAction}} Candidate */
 /** @typedef {AgentSnapshot & {lastActions?: Array<{actionId: string|null, result: string}>, lastActionResult?: string|null, recentFailures?: string[]}} ModelSnapshot */
-/** @typedef {{status: 'valid'|'invalid'|'timeout'|'unavailable', reason: string|null, candidate: Candidate|null}} Validation */
-/** @typedef {{decision: number, status: string, invalidReason: string|null, rulesActionId: string|null, juliaActionId: string|null, agreement: boolean|null, chosenActionId: string|null, confidence: number|null, latencyMs: number, fallback: boolean, possibleLoop: boolean, unproductiveLoop: boolean, repeatCount: number, snapshot: Record<string, unknown>, rulesResult: {ok: boolean, code: number|null}}} ShadowRecord */
+/** @typedef {{status: 'valid'|'invalid'|'timeout'|'unavailable'|'error', reason: string|null, candidate: Candidate|null}} Validation */
+/** @typedef {{decision: number, status: string, invalidReason: string|null, rulesActionId: string|null, juliaActionId: string|null, agreement: boolean|null, chosenActionId: string|null, confidence: number|null, latencyMs: number, fallback: boolean, possibleLoop: boolean, unproductiveLoop: boolean, repeatCount: number, snapshot: Record<string, unknown>, rulesResult: {ok: boolean, code: number|null}, source: 'real'|'mock', provenance: Record<string, any>|null, endpoint: string|null}} ShadowRecord */
 
 /** Shared, deliberately small action interface for model and rule agents. */
 /** @param {AgentAction|null|undefined} action */
@@ -88,17 +88,18 @@ export function detectSuggestedLoop(records, candidateId, rulesDecision, rulesRe
   };
 }
 
-/** @param {{decision: number, snapshot: ModelSnapshot, rulesDecision: {actionId: string|null}, rulesResult: {ok?: boolean, code?: number|null}, validation: Validation, rawDecision?: {confidence?: number}|null, latencyMs: number, previousRecords?: ShadowRecord[]}} args
+/** @param {{decision: number, snapshot: ModelSnapshot, rulesDecision: {actionId: string|null}, rulesResult: {ok?: boolean, code?: number|null}, validation: Validation, rawDecision?: {confidence?: number}|null, latencyMs: number, previousRecords?: ShadowRecord[], source?: 'real'|'mock', provenance?: Record<string, any>|null, endpoint?: string|null}} args
  * @returns {ShadowRecord}
  */
 export function createShadowRecord({
   decision, snapshot, rulesDecision, rulesResult, validation, rawDecision, latencyMs,
-  previousRecords = []
+  previousRecords = [], source = 'real', provenance = null, endpoint = null
 }) {
   const juliaActionId = validation.candidate?.id ?? null;
   const loop = detectSuggestedLoop(previousRecords, juliaActionId, rulesDecision, rulesResult);
   return {
     decision,
+    source, provenance, endpoint,
     status: validation.status,
     invalidReason: validation.reason,
     rulesActionId: rulesDecision.actionId,
@@ -135,6 +136,7 @@ export function compactSnapshot(snapshot) {
 
 /** @param {ShadowRecord[]} records */
 export function summarizeShadow(records) {
+  if (new Set(records.map((row) => row.source)).size > 1) throw new Error('Cannot mix real and mock metrics');
   const valid = records.filter((/** @type {ShadowRecord} */ row) => row.status === 'valid');
   const sortedLatency = records.map((/** @type {ShadowRecord} */ row) => row.latencyMs).filter(Number.isFinite).sort((a, b) => a - b);
   const percentile = (/** @type {number} */ p) => sortedLatency.length
@@ -155,6 +157,8 @@ export function summarizeShadow(records) {
     invalid: counts((row) => row.status === 'invalid'),
     timeouts: counts((row) => row.status === 'timeout'),
     unavailable: counts((row) => row.status === 'unavailable'),
+    errors: counts((row) => row.status === 'error' || row.status === 'unavailable'),
+    realInferences: counts((row) => row.source === 'real' && row.provenance?.inference === true),
     fallback: counts((row) => row.fallback),
     agreementRate: valid.length ? valid.filter((row) => row.agreement).length / valid.length : null,
     divergences: valid.filter((row) => !row.agreement).length,
