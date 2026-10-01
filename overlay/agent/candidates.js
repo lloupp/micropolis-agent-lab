@@ -16,7 +16,8 @@ export function availableActionsFor(snapshot, rulesAction, isLegalBuild = () => 
   const rulesActionIsLegal = rulesAction.kind === 'build'
     ? isLegalBuild(rulesAction)
     : rulesAction.kind === 'wait' ||
-      (rulesAction.kind === 'tax' && Number.isInteger(rulesAction.value) &&
+      (rulesAction.kind === 'tax' && typeof rulesAction.value === 'number' &&
+       Number.isInteger(rulesAction.value) &&
        rulesAction.value >= 0 && rulesAction.value <= 20);
   if (rulesActionIsLegal) add(rulesAction);
   const constructionTools = ['res', 'com', 'ind', 'road', 'wire', 'police', 'fire'];
