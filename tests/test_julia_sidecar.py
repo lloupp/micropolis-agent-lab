@@ -30,6 +30,17 @@ class RequestTests(unittest.TestCase):
                        lambda p: p.update(command='execute')]:
             p = payload(); mutate(p)
             with self.assertRaises(sidecar.InvalidRequest): sidecar.prepare_request(p)
+    def test_spatial_features_are_bounded_and_candidate_aligned(self):
+        p = payload()
+        p['snapshot']['candidateFeatures'] = [{'actionId': c['id'], 'legal': True, 'roadDistance': 1, 'powerDistance': None, 'zoneDistance': 2, 'roadCount': 1, 'plantCount': 0} for c in p['availableActions']]
+        state, choices = sidecar.prepare_request(p)
+        self.assertIn('Road distance 1', choices['build:res:10:10'])
+        self.assertNotIn('candidateFeatures', json.loads(state)['snapshot'])
+        p['snapshot']['candidateFeatures'][0]['powerDistance'] = -1
+        with self.assertRaises(sidecar.InvalidRequest): sidecar.prepare_request(p)
+        p['snapshot']['candidateFeatures'][0]['powerDistance'] = None
+        p['snapshot']['candidateFeatures'][0]['actionId'] = 'unknown'
+        with self.assertRaises(sidecar.InvalidRequest): sidecar.prepare_request(p)
     def test_http_failure_does_not_crash_service(self):
         class FailingRuntime:
             identity = {}
