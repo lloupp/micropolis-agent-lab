@@ -11,7 +11,7 @@
     "overlay": "node scripts/apply-overlay.mjs",
     "dev": "node scripts/dev.mjs",
     "test": "node --test && python3 -m unittest discover -s tests -p \"test_*.py\"",
-    "check": "node --check scripts/setup-micropolis.mjs && node --check scripts/apply-overlay.mjs && node --check scripts/dev.mjs && node --check overlay/agent/rules.js && node --check overlay/agent/agents.js && node --check overlay/agent/candidates.js && node --check overlay/agent/julia-client.js && node --check scripts/verify-julia-shadow.mjs && node --check overlay/agent/shadow-observer.js && node --check scripts/smoke-julia-real.mjs && npm test",
+    "check": "node --check scripts/setup-micropolis.mjs && node --check scripts/apply-overlay.mjs && node --check scripts/dev.mjs && node --check overlay/agent/rules.js && node --check overlay/agent/agents.js && node --check overlay/agent/candidates.js && node --check overlay/agent/julia-client.js && node --check scripts/verify-julia-shadow.mjs && node --check overlay/agent/shadow-observer.js && node --check scripts/smoke-julia-real.mjs && node --check overlay/agent/spatial.js && node --check overlay/agent/evaluation.js && node --check scripts/verify-julia-spatial.mjs && npm test",
     "verify:reset": "node scripts/verify-reset.mjs",
     "verify:cycle": "node scripts/verify-cycle.mjs",
     "verify:julia-shadow": "node scripts/verify-julia-shadow.mjs",
@@ -19,6 +19,7 @@
     "smoke": "node scripts/smoke.mjs",
     "julia:setup": "python3 scripts/setup-julia.py",
     "smoke:julia-real": "node scripts/smoke-julia-real.mjs",
-    "verify:julia-shadow:mock": "node scripts/verify-julia-shadow.mjs --mock"
+    "verify:julia-shadow:mock": "node scripts/verify-julia-shadow.mjs --mock",
+    "verify:julia-spatial": "node scripts/verify-julia-spatial.mjs"
   }
 }
