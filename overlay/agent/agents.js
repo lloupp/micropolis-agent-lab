@@ -1,9 +1,10 @@
+import { classifySpatial, intentOf } from './spatial.js';
 /** @typedef {import('./runtime').AgentAction} AgentAction */
 /** @typedef {import('./runtime').AgentSnapshot} AgentSnapshot */
 /** @typedef {{id: string, action: AgentAction}} Candidate */
-/** @typedef {AgentSnapshot & {lastActions?: Array<{actionId: string|null, result: string}>, lastActionResult?: string|null, recentFailures?: string[]}} ModelSnapshot */
+/** @typedef {AgentSnapshot & {lastActions?: Array<{actionId: string|null, result: string}>, lastActionResult?: string|null, recentFailures?: string[], candidateFeatures?: import('./spatial.js').CandidateFeatures[]}} ModelSnapshot */
 /** @typedef {{status: 'valid'|'invalid'|'timeout'|'unavailable'|'error', reason: string|null, candidate: Candidate|null}} Validation */
-/** @typedef {{decision: number, status: string, invalidReason: string|null, rulesActionId: string|null, juliaActionId: string|null, agreement: boolean|null, chosenActionId: string|null, confidence: number|null, latencyMs: number, fallback: boolean, possibleLoop: boolean, unproductiveLoop: boolean, repeatCount: number, snapshot: Record<string, unknown>, rulesResult: {ok: boolean, code: number|null}, source: 'real'|'mock', provenance: Record<string, any>|null, endpoint: string|null}} ShadowRecord */
+/** @typedef {{decision: number, status: string, invalidReason: string|null, rulesActionId: string|null, juliaActionId: string|null, agreement: boolean|null, chosenActionId: string|null, confidence: number|null, latencyMs: number, fallback: boolean, possibleLoop: boolean, unproductiveLoop: boolean, repeatCount: number, snapshot: Record<string, unknown>, rulesResult: {ok: boolean, code: number|null}, source: 'real'|'mock', provenance: Record<string, any>|null, endpoint: string|null, intentAgreement:boolean|null, consecutiveRepeat:boolean, spatiallyPlausible:boolean|null, spatialNeutral:boolean, spatialReason:string, candidateFeatures:import('./spatial.js').CandidateFeatures[]}} ShadowRecord */
 
 /** Shared, deliberately small action interface for model and rule agents. */
 /** @param {AgentAction|null|undefined} action */
@@ -104,6 +105,11 @@ export function createShadowRecord({
     invalidReason: validation.reason,
     rulesActionId: rulesDecision.actionId,
     juliaActionId,
+    intentAgreement: validation.status === 'valid' ? intentOf(juliaActionId) === intentOf(rulesDecision.actionId) : null,
+    consecutiveRepeat: juliaActionId !== null && previousRecords.at(-1)?.juliaActionId === juliaActionId,
+    ...(snapshot.candidateFeatures ? classifySpatial(juliaActionId, snapshot.candidateFeatures)
+      : {spatiallyPlausible: null, spatialNeutral: false, spatialReason: 'not_measured'}),
+    candidateFeatures: snapshot.candidateFeatures ?? [],
     agreement: validation.status === 'valid' ? juliaActionId === rulesDecision.actionId : null,
     chosenActionId: rulesDecision.actionId,
     confidence: validation.status === 'valid' ? rawDecision?.confidence ?? null : null,
@@ -153,6 +159,11 @@ export function summarizeShadow(records) {
   }
   return {
     decisions: records.length,
+    intentAgreement: records.length ? counts(row=>row.intentAgreement===true)/records.length : null,
+    consecutiveRepeatRate: records.length ? counts(row=>row.consecutiveRepeat)/records.length : null,
+    spatialPlausibility: records.length && records.every(row=>row.spatiallyPlausible!==null) ? counts(row=>row.spatiallyPlausible===true)/records.length : null,
+    spatialNeutralCount: counts(row=>row.spatialNeutral),
+    buildSpatialPlausibility: valid.filter(row=>!row.spatialNeutral&&typeof row.spatiallyPlausible==='boolean').length ? valid.filter(row=>!row.spatialNeutral&&row.spatiallyPlausible===true).length/valid.filter(row=>!row.spatialNeutral&&typeof row.spatiallyPlausible==='boolean').length : null,
     valid: valid.length,
     invalid: counts((row) => row.status === 'invalid'),
     timeouts: counts((row) => row.status === 'timeout'),
@@ -160,7 +171,7 @@ export function summarizeShadow(records) {
     errors: counts((row) => row.status === 'error' || row.status === 'unavailable'),
     realInferences: counts((row) => row.source === 'real' && row.provenance?.inference === true),
     fallback: counts((row) => row.fallback),
-    agreementRate: valid.length ? valid.filter((row) => row.agreement).length / valid.length : null,
+    agreementRate: records.length ? valid.filter((row) => row.agreement).length / records.length : null,
     divergences: valid.filter((row) => !row.agreement).length,
     possibleLoops: counts((row) => row.possibleLoop),
     unproductiveLoops: counts((row) => row.unproductiveLoop),

@@ -36,6 +36,23 @@ def prepare_request(payload):
         raise InvalidRequest("candidate_count")
     if len(snapshot.get("lastActions", [])) > 8 or len(snapshot.get("recentFailures", [])) > 5 or len(memory.get("recentSuggestions", [])) > 10:
         raise InvalidRequest("context_excessive")
+    features = snapshot.get("candidateFeatures", [])
+    if not isinstance(features, list) or len(features) > 20:
+        raise InvalidRequest("invalid_spatial_features")
+    spatial = {}
+    for f in features:
+        allowed = {"actionId", "legal", "roadDistance", "powerDistance", "zoneDistance", "roadCount", "plantCount"}
+        if not isinstance(f, dict) or set(f) != allowed or not isinstance(f["actionId"], str) or f["actionId"] in spatial:
+            raise InvalidRequest("invalid_spatial_features")
+        if type(f["legal"]) is not bool:
+            raise InvalidRequest("invalid_spatial_features")
+        for key in ("roadDistance", "powerDistance", "zoneDistance"):
+            if f[key] is not None and (type(f[key]) is not int or not 0 <= f[key] <= 220):
+                raise InvalidRequest("invalid_spatial_features")
+        for key in ("roadCount", "plantCount"):
+            if type(f[key]) is not int or not 0 <= f[key] <= 12000:
+                raise InvalidRequest("invalid_spatial_features")
+        spatial[f["actionId"]] = f
     criteria = {}
     for candidate in candidates:
         if not isinstance(candidate, dict) or not isinstance(candidate.get("action"), dict):
@@ -65,8 +82,16 @@ def prepare_request(payload):
             raise InvalidRequest("illegal_action")
         if candidate.get("id") != action_id or action_id in criteria:
             raise InvalidRequest("invalid_candidate_id")
+        f = spatial.get(action_id)
+        if f and kind == "build":
+            road = f["roadDistance"] if f["roadDistance"] is not None else "none"
+            power = f["powerDistance"] if f["powerDistance"] is not None else "none"
+            description += f" Road distance {road}; connected power distance {power}."
         criteria[action_id] = description
-    state = json.dumps({"snapshot": snapshot, "memory": memory}, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
+    if spatial and set(spatial) != set(criteria):
+        raise InvalidRequest("spatial_candidate_mismatch")
+    state_snapshot = {k: v for k, v in snapshot.items() if k != "candidateFeatures"}
+    state = json.dumps({"snapshot": state_snapshot, "memory": memory}, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
     if len(state.encode()) > 16000:
         raise InvalidRequest("context_excessive")
     return state, criteria

@@ -14,6 +14,7 @@
     decideRules,
     makeInitialMemory
   } from './rules.js';
+  import { candidateFeatures } from './spatial.js';
   import { availableActionsFor } from './candidates.js';
   import { createShadowObserver } from './shadow-observer.js';
   import { actionId, summarizeShadow } from './agents.js';
@@ -75,8 +76,12 @@
 
     const action = decideRules(current, memory) as AgentAction;
     let candidates: ReturnType<typeof availableActionsFor> = [];
+    let features: ReturnType<typeof candidateFeatures> = [];
     let preparationError: string | null = null;
-    try { candidates = availableActionsFor(current, action, (candidate) => isLegalBuildCandidate(simulator, candidate)); }
+    try {
+      candidates = availableActionsFor(current, action, (candidate) => isLegalBuildCandidate(simulator, candidate));
+      features = candidateFeatures((x,y)=>simulator.micropolis!.getTile(x,y),120,100,candidates,current.totalFunds);
+    }
     catch { preparationError = 'candidate_preparation_error'; }
     const selectedByRules = { actionId: actionId(action) };
     const priorHistory = history;
@@ -92,7 +97,7 @@
     history = [{ action, result: result.message }, ...history].slice(0, 8);
     if (!result.ok) failures = [result.message, ...failures].slice(0, 5);
     const modelSnapshot = {
-      ...current,
+      ...current, candidateFeatures: features,
       lastActions: priorHistory.map(({ action: recent, result: outcome }) => ({
         actionId: recent.kind === 'build'
           ? `build:${recent.tool}:${recent.x}:${recent.y}`
@@ -219,6 +224,8 @@
     <div>{shadowSummary.decisions} avaliadas · {shadowSummary.valid} válidas · {shadowSummary.invalid} inválidas</div>
     <div>{shadowSummary.realInferences} inferências reais · {shadowSummary.timeouts} timeouts · {shadowSummary.errors} erros</div>
     <div>Concordância: {shadowSummary.agreementRate === null ? '—' : Math.round(shadowSummary.agreementRate * 100) + '%'}</div>
+    <div>Plausibilidade espacial: {shadowSummary.spatialPlausibility === null ? '—' : Math.round(shadowSummary.spatialPlausibility * 100) + '%'} · neutras: {shadowSummary.spatialNeutralCount}</div>
+    <div>Intenção: {shadowSummary.intentAgreement === null ? '—' : Math.round(shadowSummary.intentAgreement * 100) + '%'} · repetições consecutivas: {shadowSummary.consecutiveRepeatRate === null ? '—' : Math.round(shadowSummary.consecutiveRepeatRate * 100) + '%'}</div>
     <div>Loops possíveis: {shadowSummary.possibleLoops} · p95: {fmt(shadowSummary.latencyMs.p95)} ms</div>
   </section>
 
