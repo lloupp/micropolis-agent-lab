@@ -1,0 +1,101 @@
+{
+  "experiment": "semantics-v3",
+  "source": "docs/evidence/spatial-v1/requests.jsonl",
+  "sourceSha256": "1547a9fc48b67e69db65f1dee2cf746d7a765150e03e183041cc4a218b946998",
+  "classifier": "physical-prerequisites-v1",
+  "comparison": "Same 100 historical states and candidates; independent memory; alternating AB/BA; v1 versus v2 description encoding.",
+  "uniqueInferenceIds": 200,
+  "summaries": {
+    "v1": {
+      "decisions": 100,
+      "intentAgreement": 0.03,
+      "consecutiveRepeatRate": 0.69,
+      "spatialPlausibility": 0.78,
+      "spatialNeutralCount": 75,
+      "buildSpatialPlausibility": 0.12,
+      "valid": 100,
+      "invalid": 0,
+      "timeouts": 0,
+      "unavailable": 0,
+      "errors": 0,
+      "realInferences": 100,
+      "fallback": 0,
+      "agreementRate": 0.03,
+      "divergences": 97,
+      "possibleLoops": 33,
+      "unproductiveLoops": 0,
+      "actionsByCategory": {
+        "tax": 43,
+        "wait": 32,
+        "road": 7,
+        "com": 18
+      },
+      "blockedByValidator": 0,
+      "latencyMs": {
+        "average": 495.7514714299999,
+        "p50": 456.85237100000086,
+        "p95": 830.5394049999995
+      }
+    },
+    "v2": {
+      "decisions": 100,
+      "intentAgreement": 0.18,
+      "consecutiveRepeatRate": 0.57,
+      "spatialPlausibility": 0.45,
+      "spatialNeutralCount": 45,
+      "buildSpatialPlausibility": 0,
+      "valid": 100,
+      "invalid": 0,
+      "timeouts": 0,
+      "unavailable": 0,
+      "errors": 0,
+      "realInferences": 100,
+      "fallback": 0,
+      "agreementRate": 0,
+      "divergences": 100,
+      "possibleLoops": 29,
+      "unproductiveLoops": 0,
+      "actionsByCategory": {
+        "tax": 34,
+        "wait": 11,
+        "road": 22,
+        "ind": 3,
+        "com": 13,
+        "res": 4,
+        "fire": 13
+      },
+      "blockedByValidator": 0,
+      "latencyMs": {
+        "average": 567.7381411600007,
+        "p50": 524.4912710000062,
+        "p95": 951.9545870000002
+      }
+    }
+  },
+  "evaluation": {
+    "result": "BLOQUEADO",
+    "mandatory": {
+      "real": true,
+      "valid": true,
+      "invalid": true,
+      "errors": true,
+      "timeouts": true,
+      "isolation": false,
+      "tests": false,
+      "check": false,
+      "ci": false,
+      "mean": false,
+      "p95": false
+    },
+    "improvement": {
+      "spatial": false,
+      "loops": true,
+      "exact": false,
+      "intent": false,
+      "consecutive": false,
+      "blocked": true
+    },
+    "improvementCount": 2
+  },
+  "limitation": "Historical replay cannot certify live Rules isolation or CI; full gate remains blocked."
+}

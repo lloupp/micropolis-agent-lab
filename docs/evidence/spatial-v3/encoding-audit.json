@@ -1,0 +1,608 @@
+{
+  "encoding": "semantics-v3",
+  "inference": false,
+  "states": 100,
+  "failures": 0,
+  "audit": [
+    {
+      "decision": 1,
+      "tokens": 583,
+      "maxOptionTokens": 34,
+      "error": null
+    },
+    {
+      "decision": 2,
+      "tokens": 629,
+      "maxOptionTokens": 35,
+      "error": null
+    },
+    {
+      "decision": 3,
+      "tokens": 651,
+      "maxOptionTokens": 35,
+      "error": null
+    },
+    {
+      "decision": 4,
+      "tokens": 673,
+      "maxOptionTokens": 35,
+      "error": null
+    },
+    {
+      "decision": 5,
+      "tokens": 698,
+      "maxOptionTokens": 35,
+      "error": null
+    },
+    {
+      "decision": 6,
+      "tokens": 743,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 7,
+      "tokens": 765,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 8,
+      "tokens": 789,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 9,
+      "tokens": 812,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 10,
+      "tokens": 812,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 11,
+      "tokens": 812,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 12,
+      "tokens": 813,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 13,
+      "tokens": 813,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 14,
+      "tokens": 813,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 15,
+      "tokens": 813,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 16,
+      "tokens": 813,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 17,
+      "tokens": 814,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 18,
+      "tokens": 814,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 19,
+      "tokens": 814,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 20,
+      "tokens": 814,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 21,
+      "tokens": 813,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 22,
+      "tokens": 813,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 23,
+      "tokens": 813,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 24,
+      "tokens": 813,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 25,
+      "tokens": 813,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 26,
+      "tokens": 813,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 27,
+      "tokens": 813,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 28,
+      "tokens": 813,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 29,
+      "tokens": 813,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 30,
+      "tokens": 813,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 31,
+      "tokens": 813,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 32,
+      "tokens": 813,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 33,
+      "tokens": 814,
+      "maxOptionTokens": 38,
+      "error": null
+    },
+    {
+      "decision": 34,
+      "tokens": 837,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 35,
+      "tokens": 837,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 36,
+      "tokens": 837,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 37,
+      "tokens": 838,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 38,
+      "tokens": 838,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 39,
+      "tokens": 838,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 40,
+      "tokens": 837,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 41,
+      "tokens": 841,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 42,
+      "tokens": 804,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 43,
+      "tokens": 801,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 44,
+      "tokens": 795,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 45,
+      "tokens": 789,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 46,
+      "tokens": 783,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 47,
+      "tokens": 776,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 48,
+      "tokens": 771,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 49,
+      "tokens": 764,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 50,
+      "tokens": 760,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 51,
+      "tokens": 760,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 52,
+      "tokens": 760,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 53,
+      "tokens": 760,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 54,
+      "tokens": 759,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 55,
+      "tokens": 760,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 56,
+      "tokens": 758,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 57,
+      "tokens": 761,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 58,
+      "tokens": 758,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 59,
+      "tokens": 760,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 60,
+      "tokens": 759,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 61,
+      "tokens": 757,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 62,
+      "tokens": 758,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 63,
+      "tokens": 757,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 64,
+      "tokens": 759,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 65,
+      "tokens": 757,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 66,
+      "tokens": 759,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 67,
+      "tokens": 759,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 68,
+      "tokens": 760,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 69,
+      "tokens": 760,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 70,
+      "tokens": 759,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 71,
+      "tokens": 760,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 72,
+      "tokens": 758,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 73,
+      "tokens": 760,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 74,
+      "tokens": 758,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 75,
+      "tokens": 760,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 76,
+      "tokens": 760,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 77,
+      "tokens": 761,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 78,
+      "tokens": 761,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 79,
+      "tokens": 759,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 80,
+      "tokens": 761,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 81,
+      "tokens": 759,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 82,
+      "tokens": 761,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 83,
+      "tokens": 800,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 84,
+      "tokens": 765,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 85,
+      "tokens": 767,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 86,
+      "tokens": 766,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 87,
+      "tokens": 767,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 88,
+      "tokens": 765,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 89,
+      "tokens": 767,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 90,
+      "tokens": 764,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 91,
+      "tokens": 766,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 92,
+      "tokens": 760,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 93,
+      "tokens": 760,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 94,
+      "tokens": 759,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 95,
+      "tokens": 757,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 96,
+      "tokens": 760,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 97,
+      "tokens": 758,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 98,
+      "tokens": 760,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 99,
+      "tokens": 760,
+      "maxOptionTokens": 41,
+      "error": null
+    },
+    {
+      "decision": 100,
+      "tokens": 758,
+      "maxOptionTokens": 41,
+      "error": null
+    }
+  ]
+}

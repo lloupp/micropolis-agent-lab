@@ -1,0 +1,41 @@
+{
+  "runtimeCodeSha": "2fefef5813c33f24598900dc9d8ac2fc9ed4c38a",
+  "ciRun": 37394680048,
+  "ciConclusion": "success",
+  "localTests": {
+    "javascript": 25,
+    "python": 6
+  },
+  "check": "passed",
+  "evidence": {
+    "rulesIsolated": true,
+    "testsGreen": true,
+    "checkGreen": true,
+    "ciGreen": true
+  },
+  "evaluation": {
+    "result": "REGRESSÃO",
+    "mandatory": {
+      "real": true,
+      "valid": true,
+      "invalid": true,
+      "errors": true,
+      "timeouts": true,
+      "isolation": true,
+      "tests": true,
+      "check": true,
+      "ci": true,
+      "mean": false,
+      "p95": false
+    },
+    "improvement": {
+      "spatial": false,
+      "loops": true,
+      "exact": false,
+      "intent": false,
+      "consecutive": false,
+      "blocked": true
+    },
+    "improvementCount": 2
+  }
+}
