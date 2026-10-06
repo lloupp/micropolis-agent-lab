@@ -11,13 +11,15 @@ const source=await readFile(file,'utf8');
 const requests=source.trim().split('\n').map(line=>JSON.parse(line));
 assert.equal(requests.length,100);
 const endpoints={v1:process.env.JULIA_V1_URL??'http://127.0.0.1:8765/decide',v2:process.env.JULIA_V2_URL??'http://127.0.0.1:8766/decide'};
-const encoding={v1:'distances-v1',v2:'semantics-v2'};
+const experiment=process.env.JULIA_EXPERIMENT??'semantics-v2';
+assert.ok(['semantics-v2','semantics-v3'].includes(experiment));
+const encoding={v1:'distances-v1',v2:experiment};
 for(const arm of ['v1','v2']){
  const health=await fetch(new URL('/health',endpoints[arm]));
  assert.ok(health.ok);assert.equal((await health.json()).spatialEncoding,encoding[arm]);
 }
 const rows={v1:[],v2:[]},memory={v1:createJuliaMemory(),v2:createJuliaMemory()};
-const dir='artifacts/julia-spatial-v2';await mkdir(dir,{recursive:true});
+const dir=`artifacts/julia-spatial-${experiment==='semantics-v2'?'v2':'v3'}`;await mkdir(dir,{recursive:true});
 for(const captured of requests){
  for(const arm of captured.decision%2?['v1','v2']:['v2','v1']){
   const reply=await decide(structuredClone(captured.snapshot),captured.candidates,memory[arm],{endpoint:endpoints[arm]});
@@ -32,7 +34,7 @@ for(const captured of requests){
 }
 const summaries={v1:summarizeShadow(rows.v1),v2:summarizeShadow(rows.v2)};
 const ids=new Set([...rows.v1,...rows.v2].filter(row=>row.provenance).map(row=>`${row.provenance.instanceId}:${row.provenance.requestId}`));
-const report={experiment:'semantics-v2',source:file,sourceSha256:createHash('sha256').update(source).digest('hex'),classifier:'physical-prerequisites-v1',comparison:'Same 100 historical states and candidates; independent memory; alternating AB/BA; v1 versus v2 description encoding.',uniqueInferenceIds:ids.size,summaries,evaluation:evaluateSpatial(summaries.v2,{rulesIsolated:false,testsGreen:false,checkGreen:false,ciGreen:false}),limitation:'Historical replay cannot certify live Rules isolation or CI; full gate remains blocked.'};
+const report={experiment,source:file,sourceSha256:createHash('sha256').update(source).digest('hex'),classifier:'physical-prerequisites-v1',comparison:'Same 100 historical states and candidates; independent memory; alternating AB/BA; v1 versus v2 description encoding.',uniqueInferenceIds:ids.size,summaries,evaluation:evaluateSpatial(summaries.v2,{rulesIsolated:false,testsGreen:false,checkGreen:false,ciGreen:false}),limitation:'Historical replay cannot certify live Rules isolation or CI; full gate remains blocked.'};
 await writeFile(`${dir}/report.json`,JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify(report,null,2));
 assert.equal(ids.size,200);assert.equal(summaries.v1.realInferences,100);assert.equal(summaries.v2.realInferences,100);

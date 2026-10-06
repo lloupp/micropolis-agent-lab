@@ -25,7 +25,7 @@ class InvalidRequest(ValueError):
 
 
 def prepare_request(payload, spatial_encoding="distances-v1"):
-    if spatial_encoding not in ("distances-v1", "semantics-v2"):
+    if spatial_encoding not in ("distances-v1", "semantics-v2", "semantics-v3"):
         raise InvalidRequest("invalid_spatial_encoding")
     if not isinstance(payload, dict) or set(payload) - {"snapshot", "availableActions", "memory"}:
         raise InvalidRequest("invalid_payload")
@@ -90,6 +90,12 @@ def prepare_request(payload, spatial_encoding="distances-v1"):
             power = f["powerDistance"] if f["powerDistance"] is not None else "none"
             if spatial_encoding == "distances-v1":
                 description += f" Road distance {road}; connected power distance {power}."
+            elif spatial_encoding == "semantics-v3":
+                road_text = "No road" if road == "none" else f"Road {road} tiles"
+                power_text = "no plant-connected power" if power == "none" else f"plant-connected power {power} tiles"
+                zone = f["zoneDistance"]
+                zone_text = "no zones" if zone is None else f"zones {zone} tiles"
+                description += f" {road_text}; {power_text}; {zone_text} from footprint."
             else:
                 road_text = "No road exists" if road == "none" else f"Nearest road is {road} tiles from the footprint"
                 power_text = "No plant-connected electricity network exists" if power == "none" else f"Plant-connected electricity network is {power} tiles from the footprint"
@@ -121,7 +127,7 @@ class JuliaRuntime:
         if digest != MODEL["weightsSha256"]:
             raise ValueError("Checkpoint SHA-256 does not match Julia-1")
         self.spatial_encoding = os.environ.get("JULIA_SPATIAL_ENCODING", "distances-v1")
-        if self.spatial_encoding not in ("distances-v1", "semantics-v2"):
+        if self.spatial_encoding not in ("distances-v1", "semantics-v2", "semantics-v3"):
             raise ValueError("invalid_spatial_encoding")
         self.engine = load_model(str(checkpoint), device="cpu", strict_encoding=True,
                                  marker_only_head=False, max_length=MODEL["maxLength"], head_length=MODEL["headLength"])
@@ -224,5 +230,5 @@ if __name__ == "__main__":
     runtime = JuliaRuntime(os.environ.get("JULIA_1_CHECKPOINT", str(ROOT / "artifacts/Julia-1")))
     server = ThreadingHTTPServer(("127.0.0.1", int(os.environ.get("JULIA_SHADOW_PORT", "8765"))), Handler)
     server.runtime = runtime
-    print(json.dumps({"status": "ready", "endpoint": "http://127.0.0.1:8765/decide", **runtime.identity}), flush=True)
+    print(json.dumps({"status": "ready", "endpoint": f"http://127.0.0.1:{server.server_port}/decide", **runtime.identity}), flush=True)
     server.serve_forever()

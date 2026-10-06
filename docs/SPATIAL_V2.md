@@ -31,3 +31,18 @@ certificar isolamento vivo do Rules. Por isso seu gate permanece BLOQUEADO mesmo
 se houver melhora das métricas. A aprovação exige adicionalmente benchmark vivo,
 testes/check/CI verdes no SHA final e os critérios congelados do usuário.
 Plausibilidade só de construções e quantidade de ações neutras continuam expostas.
+
+## Resultado v2 e novo experimento v3
+
+v2: 100/100 requisições inválidas, zero inferências v2. O contrato nativo limita
+cada opção a 48 tokens; a descrição longa excede esse limite. Evidência original
+é preservada em docs/evidence/spatial-v2 (JSONL comprimido sem perdas).
+Não considerar a latência dessas rejeições como latência de inferência.
+
+semantics-v3 é outro encoding, congelado antes da nova execução: descrições
+compactas de estrada, rede ligada à usina e zonas, com distância do footprint.
+Sem contagens redundantes, sem rótulos de plausibilidade e sem instruções novas.
+Todos os limites nativos e critérios de avaliação permanecem iguais.
+Usar JULIA_SPATIAL_ENCODING=semantics-v3 no segundo serviço e
+JULIA_EXPERIMENT=semantics-v3 npm run replay:julia-spatial no terceiro terminal.
+Resultado em artifacts/julia-spatial-v3; validar contrato de 48 tokens antes.
