@@ -41,6 +41,30 @@ class RequestTests(unittest.TestCase):
         p['snapshot']['candidateFeatures'][0]['powerDistance'] = None
         p['snapshot']['candidateFeatures'][0]['actionId'] = 'unknown'
         with self.assertRaises(sidecar.InvalidRequest): sidecar.prepare_request(p)
+    def test_semantics_v2_preserves_state_candidates_and_default(self):
+        p = payload()
+        p['snapshot']['candidateFeatures'] = [{'actionId': c['id'], 'legal': True, 'roadDistance': 1, 'powerDistance': None, 'zoneDistance': 2, 'roadCount': 1, 'plantCount': 0} for c in p['availableActions']]
+        original = json.dumps(p, sort_keys=True)
+        state_v1, v1 = sidecar.prepare_request(p)
+        state_v2, v2 = sidecar.prepare_request(p, 'semantics-v2')
+        self.assertEqual(state_v1, state_v2)
+        self.assertEqual(set(v1), set(v2))
+        self.assertEqual(v1['wait'], v2['wait'])
+        self.assertIn('Road distance 1', v1['build:res:10:10'])
+        self.assertIn('Nearest road is 1 tiles from the footprint', v2['build:res:10:10'])
+        self.assertIn('No plant-connected electricity network exists', v2['build:res:10:10'])
+        self.assertIn('Nearest existing zone is 2 tiles', v2['build:res:10:10'])
+        self.assertEqual(original, json.dumps(p, sort_keys=True))
+        with self.assertRaises(sidecar.InvalidRequest):
+            sidecar.prepare_request(p, 'unknown')
+
+    def test_compact_semantics_keeps_observations_and_neutral_choices(self):
+        p = payload()
+        p['snapshot']['candidateFeatures'] = [{'actionId': c['id'], 'legal': True, 'roadDistance': 1, 'powerDistance': 3, 'zoneDistance': None, 'roadCount': 1, 'plantCount': 1} for c in p['availableActions']]
+        _, choices = sidecar.prepare_request(p, 'semantics-v3')
+        self.assertIn('Road 1 tiles; plant-connected power 3 tiles; no zones from footprint.', choices['build:res:10:10'])
+        self.assertEqual(choices['wait'], sidecar.prepare_request(p)[1]['wait'])
+
     def test_http_failure_does_not_crash_service(self):
         class FailingRuntime:
             identity = {}

@@ -1,0 +1,408 @@
+{
+  "encoding": "semantics-v2",
+  "inference": false,
+  "states": 100,
+  "failures": 100,
+  "audit": [
+    {
+      "decision": 1,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 2,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 3,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 4,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 5,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 6,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 7,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 8,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 9,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 10,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 11,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 12,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 13,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 14,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 15,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 16,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 17,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 18,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 19,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 20,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 21,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 22,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 23,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 24,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 25,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 26,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 27,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 28,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 29,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 30,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 31,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 32,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 33,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 34,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 35,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 36,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 37,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 38,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 39,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 40,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 41,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 42,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 43,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 44,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 45,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 46,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 47,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 48,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 49,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 50,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 51,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 52,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 53,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 54,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 55,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 56,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 57,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 58,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 59,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 60,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 61,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 62,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 63,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 64,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 65,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 66,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 67,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 68,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 69,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 70,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 71,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 72,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 73,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 74,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 75,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 76,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 77,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 78,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 79,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 80,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 81,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 82,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 83,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 84,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 85,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 86,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 87,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 88,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 89,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 90,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 91,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 92,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 93,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 94,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 95,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 96,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 97,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 98,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 99,
+      "error": "Option exceeds 48-token model contract"
+    },
+    {
+      "decision": 100,
+      "error": "Option exceeds 48-token model contract"
+    }
+  ]
+}

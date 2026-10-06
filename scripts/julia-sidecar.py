@@ -24,7 +24,9 @@ class InvalidRequest(ValueError):
     pass
 
 
-def prepare_request(payload):
+def prepare_request(payload, spatial_encoding="distances-v1"):
+    if spatial_encoding not in ("distances-v1", "semantics-v2", "semantics-v3"):
+        raise InvalidRequest("invalid_spatial_encoding")
     if not isinstance(payload, dict) or set(payload) - {"snapshot", "availableActions", "memory"}:
         raise InvalidRequest("invalid_payload")
     snapshot = payload.get("snapshot")
@@ -86,7 +88,22 @@ def prepare_request(payload):
         if f and kind == "build":
             road = f["roadDistance"] if f["roadDistance"] is not None else "none"
             power = f["powerDistance"] if f["powerDistance"] is not None else "none"
-            description += f" Road distance {road}; connected power distance {power}."
+            if spatial_encoding == "distances-v1":
+                description += f" Road distance {road}; connected power distance {power}."
+            elif spatial_encoding == "semantics-v3":
+                road_text = "No road" if road == "none" else f"Road {road} tiles"
+                power_text = "no plant-connected power" if power == "none" else f"plant-connected power {power} tiles"
+                zone = f["zoneDistance"]
+                zone_text = "no zones" if zone is None else f"zones {zone} tiles"
+                description += f" {road_text}; {power_text}; {zone_text} from footprint."
+            else:
+                road_text = "No road exists" if road == "none" else f"Nearest road is {road} tiles from the footprint"
+                power_text = "No plant-connected electricity network exists" if power == "none" else f"Plant-connected electricity network is {power} tiles from the footprint"
+                zone = f["zoneDistance"]
+                zone_text = "No existing zone" if zone is None else f"Nearest existing zone is {zone} tiles from the footprint"
+                description += f" {road_text}; {power_text}; {zone_text}."
+                description += f" Existing road tiles: {f['roadCount']}; power plant tiles: {f['plantCount']}."
+                description += " Network proximity does not guarantee this new building is energized."
         criteria[action_id] = description
     if spatial and set(spatial) != set(criteria):
         raise InvalidRequest("spatial_candidate_mismatch")
@@ -109,17 +126,21 @@ class JuliaRuntime:
             digest = hashlib.file_digest(weights, "sha256").hexdigest()
         if digest != MODEL["weightsSha256"]:
             raise ValueError("Checkpoint SHA-256 does not match Julia-1")
+        self.spatial_encoding = os.environ.get("JULIA_SPATIAL_ENCODING", "distances-v1")
+        if self.spatial_encoding not in ("distances-v1", "semantics-v2", "semantics-v3"):
+            raise ValueError("invalid_spatial_encoding")
         self.engine = load_model(str(checkpoint), device="cpu", strict_encoding=True,
                                  marker_only_head=False, max_length=MODEL["maxLength"], head_length=MODEL["headLength"])
         self.identity = {key: MODEL[key] for key in ("modelId", "revision", "weightsSha256", "provider")}
         self.identity.update(device="cpu", instanceId=str(uuid.uuid4()),
                              hardware=platform.processor() or platform.machine(),
-                             torch=torch.__version__, transformers=transformers.__version__)
+                             torch=torch.__version__, transformers=transformers.__version__,
+                             spatialEncoding=self.spatial_encoding)
         self.lock = threading.Lock()
         self.count = 0
 
     def decide(self, payload):
-        state, criteria = prepare_request(payload)
+        state, criteria = prepare_request(payload, self.spatial_encoding)
         if not self.lock.acquire(blocking=False):
             raise RuntimeError("service_busy")
         try:
@@ -209,5 +230,5 @@ if __name__ == "__main__":
     runtime = JuliaRuntime(os.environ.get("JULIA_1_CHECKPOINT", str(ROOT / "artifacts/Julia-1")))
     server = ThreadingHTTPServer(("127.0.0.1", int(os.environ.get("JULIA_SHADOW_PORT", "8765"))), Handler)
     server.runtime = runtime
-    print(json.dumps({"status": "ready", "endpoint": "http://127.0.0.1:8765/decide", **runtime.identity}), flush=True)
+    print(json.dumps({"status": "ready", "endpoint": f"http://127.0.0.1:{server.server_port}/decide", **runtime.identity}), flush=True)
     server.serve_forever()
