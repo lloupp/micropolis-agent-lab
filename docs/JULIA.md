@@ -29,6 +29,16 @@ histórico de 8 ações/5 falhas/10 sugestões, contexto de 4096 tokens. Excesso
 rejeitado, nunca truncado silenciosamente. `JULIA_DEBUG=1` registra probabilidades
 brutas. Confiança é a probabilidade nativa; não é avaliação de utilidade urbana.
 
+Leituras dos cabeçalhos e do corpo HTTP têm prazo de 5 segundos de inatividade;
+corpo incompleto retorna 422 e timeout durante a leitura do corpo retorna 408.
+Content-Length duplicado ou inválido e Transfer-Encoding são rejeitados.
+Históricos precisam ser listas e valores não finitos (NaN/Infinity) não são
+aceitos. Esses limites não encerram inferência nativa já iniciada.
+
+Reset/desmontagem do painel aborta a requisição HTTP ativa e ignora a fila do
+episódio anterior. Cancelamento pelo chamador é distinguido de timeout no cliente;
+abortar HTTP não interrompe uma inferência PyTorch já em andamento no serviço.
+
 Para navegador, o sidecar permite CORS em localhost/127.0.0.1:5173;
 `JULIA_SHADOW_ALLOWED_ORIGINS` configura origens específicas. O painel usa o
 mesmo observer do benchmark. A execução de Rules continua sem o serviço.

@@ -15,21 +15,25 @@ export function isRealJuliaProvenance(provenance) {
  * @param {import('./runtime').AgentSnapshot & {lastActions?: Array<{actionId: string|null, result: string}>, lastActionResult?: string|null, recentFailures?: string[]}} snapshot
  * @param {Array<{id: string, action: import('./runtime').AgentAction}>} availableActions
  * @param {unknown} memory
- * @param {{endpoint?: string, timeoutMs?: number, fetchImpl?: typeof fetch}} [options]
+ * @param {{endpoint?: string, timeoutMs?: number, fetchImpl?: typeof fetch, signal?: AbortSignal}} [options]
  * @returns {Promise<JuliaReply>}
  */
 export async function decide(snapshot, availableActions, memory, {
   endpoint = /** @type {any} */ (globalThis).__JULIA_SHADOW_URL__ ?? 'http://127.0.0.1:8765/decide',
   timeoutMs = 10000,
-  fetchImpl = globalThis.fetch
+  fetchImpl = globalThis.fetch,
+  signal
 } = {}) {
   if (!endpoint || typeof fetchImpl !== 'function') return { status: 'unavailable', reason: 'service_not_configured', latencyMs: 0 };
   const started = performance.now();
   const controller = new AbortController();
+  const cancel = () => controller.abort();
+  signal?.addEventListener('abort', cancel, { once: true });
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   /** @param {JuliaReply['status']} status @param {string} reason @returns {JuliaReply} */
   const failure = (status, reason) => ({ status, reason, endpoint, latencyMs: performance.now() - started });
   try {
+    if (signal?.aborted) return failure('unavailable', 'request_cancelled');
     const body = JSON.stringify({ snapshot, availableActions, memory });
     if (new TextEncoder().encode(body).length > model.maxRequestBytes) return failure('invalid', 'context_excessive');
     const response = await fetchImpl(endpoint, {
@@ -54,9 +58,11 @@ export async function decide(snapshot, availableActions, memory, {
     return { status: 'response', output: envelope.decision, provenance: envelope.provenance,
       endpoint, latencyMs: performance.now() - started };
   } catch (error) {
+    if (signal?.aborted) return failure('unavailable', 'request_cancelled');
     return failure(error instanceof Error && error.name === 'AbortError' ? 'timeout' : 'unavailable',
       error instanceof Error && error.name === 'AbortError' ? 'request_timeout' : 'connection_error');
   } finally {
     clearTimeout(timeout);
+    signal?.removeEventListener('abort', cancel);
   }
 }

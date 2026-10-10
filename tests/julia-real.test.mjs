@@ -34,3 +34,37 @@ test('real/mock aggregation cannot mix',()=>assert.throws(()=>summarizeShadow([{
 test('reset cancels stale queued inference',async()=>{
  const observer=createShadowObserver({decider:async()=>{throw Error('must not run');}});observer.enqueue({decision:1,snapshot:{},candidates,rulesDecision:{actionId:'wait'},rulesResult:{ok:true}});observer.cancel();await observer.drain();assert.equal(observer.records().length,0);
 });
+test('cancel aborts in-flight shadow and suppresses stale callbacks', async () => {
+ let calls = 0, callbacks = 0, wasAborted = false, started;
+ const ready = new Promise(resolve => { started = resolve; });
+ const observer = createShadowObserver({source: 'mock', onRecord: () => { callbacks++; },
+  decider: async (_snapshot, _candidates, _memory, {signal} = {}) => {
+   calls++; started();
+   await new Promise((resolve, reject) => {
+    signal?.addEventListener('abort', () => { wasAborted = true; reject(new DOMException('Canceled', 'AbortError')); }, {once: true});
+   });
+   return {status: 'response', output: {actionId: 'wait'}, latencyMs: 1};
+  }});
+ for (let decision = 1; decision <= 2; decision++) observer.enqueue({decision, snapshot: {}, candidates,
+  rulesDecision: {actionId: 'wait'}, rulesResult: {ok: true}});
+ await ready; observer.cancel();
+ assert.equal(wasAborted, true);
+ await observer.drain();
+ assert.equal(calls, 1); assert.equal(callbacks, 0); assert.equal(observer.records().length, 0);
+});
+test('client distinguishes caller cancellation and does not fetch after cancellation', async () => {
+ const controller = new AbortController(); let started, aborted = false;
+ const ready = new Promise(resolve => { started = resolve; });
+ const fetchImpl = async (_url, {signal}) => {
+  started();
+  return await new Promise((resolve, reject) => signal.addEventListener('abort', () => {
+   aborted = true; reject(new DOMException('Canceled', 'AbortError'));
+  }, {once: true}));
+ };
+ const reply = decide({}, candidates, {}, {signal: controller.signal, fetchImpl});
+ await ready; controller.abort();
+ assert.equal((await reply).reason, 'request_cancelled'); assert.equal(aborted, true);
+ const result = await decide({}, candidates, {}, {signal: controller.signal,
+  fetchImpl: async () => { assert.fail('canceled request must not fetch'); }});
+ assert.equal(result.reason, 'request_cancelled');
+});

@@ -10,6 +10,7 @@ export function createShadowObserver({ decider = decide, source = 'real', onReco
   let memory = createJuliaMemory();
   let pending = Promise.resolve();
   let canceled = false;
+  const controller = new AbortController();
 
   /** @param {{decision: number, snapshot: import('./agents.js').ModelSnapshot, candidates: import('./agents.js').Candidate[], rulesDecision: {actionId: string|null}, rulesResult: import('./runtime').ExecutionResult, preparationError?: string|null}} data */
   function enqueue(data) {
@@ -25,7 +26,7 @@ export function createShadowObserver({ decider = decide, source = 'real', onReco
       try {
         reply = request.preparationError
           ? { status: 'invalid', reason: request.preparationError, latencyMs: 0 }
-          : await decider(request.snapshot, request.candidates, memory);
+          : await decider(request.snapshot, request.candidates, memory, { signal: controller.signal });
       } catch {
         reply = { status: 'error', reason: 'decider_exception', latencyMs: 0 };
       }
@@ -44,5 +45,8 @@ export function createShadowObserver({ decider = decide, source = 'real', onReco
       try { onRecord([...records]); } catch { /* UI observers cannot affect Rules. */ }
     });
   }
-  return { enqueue, drain: () => pending, records: () => [...records], cancel: () => { canceled = true; } };
+  return { enqueue, drain: () => pending, records: () => [...records], cancel: () => {
+    canceled = true;
+    controller.abort();
+  } };
 }
