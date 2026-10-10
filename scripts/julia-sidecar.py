@@ -4,6 +4,7 @@ import json
 import math
 import os
 import platform
+import socket
 import sys
 import threading
 import time
@@ -34,8 +35,17 @@ def prepare_request(payload):
         raise InvalidRequest("invalid_snapshot_or_memory")
     if not isinstance(candidates, list) or not 2 <= len(candidates) <= 20:
         raise InvalidRequest("candidate_count")
-    if len(snapshot.get("lastActions", [])) > 8 or len(snapshot.get("recentFailures", [])) > 5 or len(memory.get("recentSuggestions", [])) > 10:
-        raise InvalidRequest("context_excessive")
+    for context, field, limit in [(snapshot, "lastActions", 8),
+                                  (snapshot, "recentFailures", 5),
+                                  (memory, "recentSuggestions", 10)]:
+        history = context.get(field, [])
+        if not isinstance(history, list):
+            raise InvalidRequest("invalid_history")
+        if len(history) > limit:
+            raise InvalidRequest("context_excessive")
+    funds = snapshot.get("totalFunds", 0)
+    if type(funds) not in (int, float) or (type(funds) is float and not math.isfinite(funds)):
+        raise InvalidRequest("invalid_funds")
     criteria = {}
     for candidate in candidates:
         if not isinstance(candidate, dict) or not isinstance(candidate.get("action"), dict):
@@ -50,7 +60,7 @@ def prepare_request(payload):
             offset = 1 if size > 1 else 0
             if x - offset < 0 or y - offset < 0 or x - offset + size > 120 or y - offset + size > 100:
                 raise InvalidRequest("invalid_coordinates")
-            if snapshot.get("totalFunds", 0) < cost:
+            if funds < cost:
                 raise InvalidRequest("insufficient_funds")
             action_id = f"build:{tool}:{x}:{y}"
             description = f"Build {label} at ({x}, {y}), costing ${cost}."
@@ -66,8 +76,12 @@ def prepare_request(payload):
         if candidate.get("id") != action_id or action_id in criteria:
             raise InvalidRequest("invalid_candidate_id")
         criteria[action_id] = description
-    state = json.dumps({"snapshot": snapshot, "memory": memory}, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
-    if len(state.encode()) > 16000:
+    try:
+        state = json.dumps({"snapshot": snapshot, "memory": memory}, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
+        state_size = len(state.encode())
+    except (ValueError, TypeError, RecursionError, UnicodeError) as error:
+        raise InvalidRequest("invalid_context") from error
+    if state_size > 16000:
         raise InvalidRequest("context_excessive")
     return state, criteria
 
@@ -116,6 +130,11 @@ class JuliaRuntime:
 
 
 class Handler(BaseHTTPRequestHandler):
+    def setup(self):
+        super().setup()
+        # Bound header/body reads; this does not limit model inference time.
+        self.connection.settimeout(getattr(self.server, "request_timeout", 5))
+
     def allowed_origin(self):
         origin = self.headers.get("Origin")
         allowed = os.environ.get("JULIA_SHADOW_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")
@@ -135,12 +154,27 @@ class Handler(BaseHTTPRequestHandler):
             self.send_error(403)
             return
         try:
-            length = int(self.headers.get("Content-Length", "0"))
+            lengths = self.headers.get_all("Content-Length", [])
+            if len(lengths) != 1 or not lengths[0].isascii() or not lengths[0].isdecimal() or self.headers.get("Transfer-Encoding"):
+                raise InvalidRequest("invalid_content_length")
+            length = int(lengths[0])
             if not 0 < length <= MODEL["maxRequestBytes"]:
                 raise InvalidRequest("context_excessive")
-            payload = json.loads(self.rfile.read(length))
+            body = self.rfile.read(length)
+            if len(body) != length:
+                raise InvalidRequest("incomplete_body")
+            def reject_constant(_value):
+                raise InvalidRequest("invalid_json")
+            try:
+                payload = json.loads(body, parse_constant=reject_constant)
+            except (ValueError, UnicodeError, RecursionError) as error:
+                raise InvalidRequest("invalid_json") from error
             self.send_json(200, self.server.runtime.decide(payload))
+        except (socket.timeout, TimeoutError):
+            self.close_connection = True
+            self.send_json(408, {"error": {"code": "request_timeout"}})
         except (InvalidRequest, ValueError, TypeError, KeyError) as error:
+            self.close_connection = True
             self.send_json(422, {"error": {"code": str(error)[:180]}})
         except RuntimeError as error:
             self.send_json(503, {"error": {"code": str(error)[:180]}})
