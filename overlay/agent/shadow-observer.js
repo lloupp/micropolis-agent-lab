@@ -34,7 +34,8 @@ export function createShadowObserver({ decider = decide, source = 'real', maxPen
       pending: queue.length + Number(active), queued: queue.length, active,
       retained: records.length, dropped, lastDroppedDecision, evicted, canceledRequests, canceled };
   }
-  function notifyState() {
+  function notifyState(includeCanceled = false) {
+    if (canceled && !includeCanceled) return;
     try { onState(stats()); } catch { /* UI observers cannot affect Rules. */ }
   }
   // Returned data cannot mutate retained evidence or loop detection.
@@ -128,7 +129,8 @@ export function createShadowObserver({ decider = decide, source = 'real', maxPen
       queue.length = 0;
       active = false;
       controller.abort();
-      notifyState();
+      // Publish cancellation once, synchronously; late cleanup cannot update a new episode.
+      notifyState(true);
     }
   };
 }

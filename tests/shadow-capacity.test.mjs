@@ -130,10 +130,16 @@ test('cancel accounts queued requests before worker starts and ignores a late re
   assert.equal(queued.stats().canceledRequests, 2);
   assert.equal(queued.stats().pending, 0);
   let release, started;
+  const states = [];
   const ready = new Promise(resolve => { started = resolve; });
   const gate = new Promise(resolve => { release = resolve; });
-  const late = createShadowObserver({ source: 'mock', decider: async () => { started(); await gate; return reply(); } });
-  late.enqueue(request(1)); await ready; late.cancel(); release(); await late.drain();
+  const late = createShadowObserver({ source: 'mock', onState: state => states.push(state),
+    decider: async () => { started(); await gate; return reply(); } });
+  late.enqueue(request(1)); await ready; late.cancel();
+  const notificationsAtCancel = states.length;
+  assert.equal(states.at(-1).canceled, true);
+  release(); await late.drain();
+  assert.equal(states.length, notificationsAtCancel, 'old telemetry must not overwrite a new episode after reset');
   assert.equal(late.stats().completed, 0);
   assert.equal(late.stats().canceledRequests, 1);
   assert.equal(late.records().length, 0);
