@@ -1,0 +1,1751 @@
+{
+  "source": "mock",
+  "executor": "Rules only",
+  "seed": 42,
+  "decisions": 100,
+  "ticksPerDecision": 39,
+  "identicalRulesActions": true,
+  "identicalFinalSnapshot": true,
+  "identicalMap": true,
+  "baseline": {
+    "source": "mock",
+    "initial": {
+      "totalFunds": 20000,
+      "cityPop": 0,
+      "cityTime": 1,
+      "simCycle": 1,
+      "resPop": 0,
+      "comPop": 0,
+      "indPop": 0,
+      "cityYear": 1900,
+      "cityMonth": 0,
+      "cityTax": 7,
+      "cityScore": 712,
+      "resValve": 179,
+      "comValve": -600,
+      "indValve": 600,
+      "crimeAverage": 0,
+      "pollutionAverage": 0,
+      "trafficAverage": 0,
+      "landValueAverage": 0,
+      "poweredZoneCount": 0,
+      "unpoweredZoneCount": 0,
+      "cashFlow": 0
+    },
+    "final": {
+      "totalFunds": 15358,
+      "cityPop": 3360,
+      "cityTime": 244,
+      "simCycle": 244,
+      "resPop": 96,
+      "comPop": 3,
+      "indPop": 6,
+      "cityYear": 1905,
+      "cityMonth": 1,
+      "cityTax": 7,
+      "cityScore": 712,
+      "resValve": -99,
+      "comValve": 1500,
+      "indValve": 1500,
+      "crimeAverage": 96,
+      "pollutionAverage": 48,
+      "trafficAverage": 69,
+      "landValueAverage": 72,
+      "poweredZoneCount": 11,
+      "unpoweredZoneCount": 0,
+      "cashFlow": -4
+    },
+    "mapSha256": "fb35cd582ec4572f7fbf4948c4cfa7d184e443b169a751eb2ea07e11d4bed345",
+    "rulesActions": [
+      "build:coal:36:51",
+      "build:wire:39:50",
+      "build:wire:40:50",
+      "build:wire:41:50",
+      "build:road:40:46",
+      "build:road:41:46",
+      "build:road:42:46",
+      "build:road:43:46",
+      "build:road:44:46",
+      "build:road:45:46",
+      "build:road:46:46",
+      "build:road:47:46",
+      "build:road:48:46",
+      "build:road:49:46",
+      "build:road:50:46",
+      "build:road:51:46",
+      "build:road:52:46",
+      "build:road:53:46",
+      "build:road:54:46",
+      "build:road:55:46",
+      "build:road:56:46",
+      "build:road:57:46",
+      "build:road:58:46",
+      "build:road:59:46",
+      "build:road:60:46",
+      "build:road:61:46",
+      "build:road:62:46",
+      "build:road:63:46",
+      "build:road:64:46",
+      "build:road:65:46",
+      "build:road:66:46",
+      "build:road:67:46",
+      "build:ind:42:48",
+      "build:ind:45:48",
+      "build:com:48:48",
+      "build:res:51:48",
+      "build:res:54:48",
+      "build:res:57:48",
+      "build:res:60:48",
+      "build:res:63:48",
+      "build:res:66:48",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "build:police:54:51",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait"
+    ],
+    "rulesDecisions": 100,
+    "rulesCompletedBeforeDrain": false,
+    "beforeDrain": {
+      "maxPending": 128,
+      "maxRecords": 512,
+      "submitted": 100,
+      "accepted": 100,
+      "completed": 100,
+      "pending": 0,
+      "queued": 0,
+      "active": false,
+      "retained": 100,
+      "dropped": 0,
+      "lastDroppedDecision": null,
+      "evicted": 0,
+      "canceledRequests": 0,
+      "canceled": false
+    },
+    "stats": {
+      "maxPending": 128,
+      "maxRecords": 512,
+      "submitted": 100,
+      "accepted": 100,
+      "completed": 100,
+      "pending": 0,
+      "queued": 0,
+      "active": false,
+      "retained": 100,
+      "dropped": 0,
+      "lastDroppedDecision": null,
+      "evicted": 0,
+      "canceledRequests": 0,
+      "canceled": false
+    },
+    "summary": {
+      "decisions": 100,
+      "valid": 100,
+      "invalid": 0,
+      "timeouts": 0,
+      "unavailable": 0,
+      "errors": 0,
+      "realInferences": 0,
+      "fallback": 0,
+      "agreementRate": 0.06,
+      "divergences": 94,
+      "possibleLoops": 86,
+      "unproductiveLoops": 0,
+      "actionsByCategory": {
+        "ind": 7,
+        "res": 82,
+        "com": 11
+      },
+      "blockedByValidator": 0,
+      "latencyMs": {
+        "average": 0,
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    "callbackDecisions": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100
+    ],
+    "inferenceEvents": [
+      {
+        "step": 1,
+        "event": "start"
+      },
+      {
+        "step": 1,
+        "event": "complete"
+      },
+      {
+        "step": 2,
+        "event": "start"
+      },
+      {
+        "step": 2,
+        "event": "complete"
+      },
+      {
+        "step": 3,
+        "event": "start"
+      },
+      {
+        "step": 3,
+        "event": "complete"
+      },
+      {
+        "step": 4,
+        "event": "start"
+      },
+      {
+        "step": 4,
+        "event": "complete"
+      },
+      {
+        "step": 5,
+        "event": "start"
+      },
+      {
+        "step": 5,
+        "event": "complete"
+      },
+      {
+        "step": 6,
+        "event": "start"
+      },
+      {
+        "step": 6,
+        "event": "complete"
+      },
+      {
+        "step": 7,
+        "event": "start"
+      },
+      {
+        "step": 7,
+        "event": "complete"
+      },
+      {
+        "step": 8,
+        "event": "start"
+      },
+      {
+        "step": 8,
+        "event": "complete"
+      },
+      {
+        "step": 9,
+        "event": "start"
+      },
+      {
+        "step": 9,
+        "event": "complete"
+      },
+      {
+        "step": 10,
+        "event": "start"
+      },
+      {
+        "step": 10,
+        "event": "complete"
+      },
+      {
+        "step": 11,
+        "event": "start"
+      },
+      {
+        "step": 11,
+        "event": "complete"
+      },
+      {
+        "step": 12,
+        "event": "start"
+      },
+      {
+        "step": 12,
+        "event": "complete"
+      },
+      {
+        "step": 13,
+        "event": "start"
+      },
+      {
+        "step": 13,
+        "event": "complete"
+      },
+      {
+        "step": 14,
+        "event": "start"
+      },
+      {
+        "step": 14,
+        "event": "complete"
+      },
+      {
+        "step": 15,
+        "event": "start"
+      },
+      {
+        "step": 15,
+        "event": "complete"
+      },
+      {
+        "step": 16,
+        "event": "start"
+      },
+      {
+        "step": 16,
+        "event": "complete"
+      },
+      {
+        "step": 17,
+        "event": "start"
+      },
+      {
+        "step": 17,
+        "event": "complete"
+      },
+      {
+        "step": 18,
+        "event": "start"
+      },
+      {
+        "step": 18,
+        "event": "complete"
+      },
+      {
+        "step": 19,
+        "event": "start"
+      },
+      {
+        "step": 19,
+        "event": "complete"
+      },
+      {
+        "step": 20,
+        "event": "start"
+      },
+      {
+        "step": 20,
+        "event": "complete"
+      },
+      {
+        "step": 21,
+        "event": "start"
+      },
+      {
+        "step": 21,
+        "event": "complete"
+      },
+      {
+        "step": 22,
+        "event": "start"
+      },
+      {
+        "step": 22,
+        "event": "complete"
+      },
+      {
+        "step": 23,
+        "event": "start"
+      },
+      {
+        "step": 23,
+        "event": "complete"
+      },
+      {
+        "step": 24,
+        "event": "start"
+      },
+      {
+        "step": 24,
+        "event": "complete"
+      },
+      {
+        "step": 25,
+        "event": "start"
+      },
+      {
+        "step": 25,
+        "event": "complete"
+      },
+      {
+        "step": 26,
+        "event": "start"
+      },
+      {
+        "step": 26,
+        "event": "complete"
+      },
+      {
+        "step": 27,
+        "event": "start"
+      },
+      {
+        "step": 27,
+        "event": "complete"
+      },
+      {
+        "step": 28,
+        "event": "start"
+      },
+      {
+        "step": 28,
+        "event": "complete"
+      },
+      {
+        "step": 29,
+        "event": "start"
+      },
+      {
+        "step": 29,
+        "event": "complete"
+      },
+      {
+        "step": 30,
+        "event": "start"
+      },
+      {
+        "step": 30,
+        "event": "complete"
+      },
+      {
+        "step": 31,
+        "event": "start"
+      },
+      {
+        "step": 31,
+        "event": "complete"
+      },
+      {
+        "step": 32,
+        "event": "start"
+      },
+      {
+        "step": 32,
+        "event": "complete"
+      },
+      {
+        "step": 33,
+        "event": "start"
+      },
+      {
+        "step": 33,
+        "event": "complete"
+      },
+      {
+        "step": 34,
+        "event": "start"
+      },
+      {
+        "step": 34,
+        "event": "complete"
+      },
+      {
+        "step": 35,
+        "event": "start"
+      },
+      {
+        "step": 35,
+        "event": "complete"
+      },
+      {
+        "step": 36,
+        "event": "start"
+      },
+      {
+        "step": 36,
+        "event": "complete"
+      },
+      {
+        "step": 37,
+        "event": "start"
+      },
+      {
+        "step": 37,
+        "event": "complete"
+      },
+      {
+        "step": 38,
+        "event": "start"
+      },
+      {
+        "step": 38,
+        "event": "complete"
+      },
+      {
+        "step": 39,
+        "event": "start"
+      },
+      {
+        "step": 39,
+        "event": "complete"
+      },
+      {
+        "step": 40,
+        "event": "start"
+      },
+      {
+        "step": 40,
+        "event": "complete"
+      },
+      {
+        "step": 41,
+        "event": "start"
+      },
+      {
+        "step": 41,
+        "event": "complete"
+      },
+      {
+        "step": 42,
+        "event": "start"
+      },
+      {
+        "step": 42,
+        "event": "complete"
+      },
+      {
+        "step": 43,
+        "event": "start"
+      },
+      {
+        "step": 43,
+        "event": "complete"
+      },
+      {
+        "step": 44,
+        "event": "start"
+      },
+      {
+        "step": 44,
+        "event": "complete"
+      },
+      {
+        "step": 45,
+        "event": "start"
+      },
+      {
+        "step": 45,
+        "event": "complete"
+      },
+      {
+        "step": 46,
+        "event": "start"
+      },
+      {
+        "step": 46,
+        "event": "complete"
+      },
+      {
+        "step": 47,
+        "event": "start"
+      },
+      {
+        "step": 47,
+        "event": "complete"
+      },
+      {
+        "step": 48,
+        "event": "start"
+      },
+      {
+        "step": 48,
+        "event": "complete"
+      },
+      {
+        "step": 49,
+        "event": "start"
+      },
+      {
+        "step": 49,
+        "event": "complete"
+      },
+      {
+        "step": 50,
+        "event": "start"
+      },
+      {
+        "step": 50,
+        "event": "complete"
+      },
+      {
+        "step": 51,
+        "event": "start"
+      },
+      {
+        "step": 51,
+        "event": "complete"
+      },
+      {
+        "step": 52,
+        "event": "start"
+      },
+      {
+        "step": 52,
+        "event": "complete"
+      },
+      {
+        "step": 53,
+        "event": "start"
+      },
+      {
+        "step": 53,
+        "event": "complete"
+      },
+      {
+        "step": 54,
+        "event": "start"
+      },
+      {
+        "step": 54,
+        "event": "complete"
+      },
+      {
+        "step": 55,
+        "event": "start"
+      },
+      {
+        "step": 55,
+        "event": "complete"
+      },
+      {
+        "step": 56,
+        "event": "start"
+      },
+      {
+        "step": 56,
+        "event": "complete"
+      },
+      {
+        "step": 57,
+        "event": "start"
+      },
+      {
+        "step": 57,
+        "event": "complete"
+      },
+      {
+        "step": 58,
+        "event": "start"
+      },
+      {
+        "step": 58,
+        "event": "complete"
+      },
+      {
+        "step": 59,
+        "event": "start"
+      },
+      {
+        "step": 59,
+        "event": "complete"
+      },
+      {
+        "step": 60,
+        "event": "start"
+      },
+      {
+        "step": 60,
+        "event": "complete"
+      },
+      {
+        "step": 61,
+        "event": "start"
+      },
+      {
+        "step": 61,
+        "event": "complete"
+      },
+      {
+        "step": 62,
+        "event": "start"
+      },
+      {
+        "step": 62,
+        "event": "complete"
+      },
+      {
+        "step": 63,
+        "event": "start"
+      },
+      {
+        "step": 63,
+        "event": "complete"
+      },
+      {
+        "step": 64,
+        "event": "start"
+      },
+      {
+        "step": 64,
+        "event": "complete"
+      },
+      {
+        "step": 65,
+        "event": "start"
+      },
+      {
+        "step": 65,
+        "event": "complete"
+      },
+      {
+        "step": 66,
+        "event": "start"
+      },
+      {
+        "step": 66,
+        "event": "complete"
+      },
+      {
+        "step": 67,
+        "event": "start"
+      },
+      {
+        "step": 67,
+        "event": "complete"
+      },
+      {
+        "step": 68,
+        "event": "start"
+      },
+      {
+        "step": 68,
+        "event": "complete"
+      },
+      {
+        "step": 69,
+        "event": "start"
+      },
+      {
+        "step": 69,
+        "event": "complete"
+      },
+      {
+        "step": 70,
+        "event": "start"
+      },
+      {
+        "step": 70,
+        "event": "complete"
+      },
+      {
+        "step": 71,
+        "event": "start"
+      },
+      {
+        "step": 71,
+        "event": "complete"
+      },
+      {
+        "step": 72,
+        "event": "start"
+      },
+      {
+        "step": 72,
+        "event": "complete"
+      },
+      {
+        "step": 73,
+        "event": "start"
+      },
+      {
+        "step": 73,
+        "event": "complete"
+      },
+      {
+        "step": 74,
+        "event": "start"
+      },
+      {
+        "step": 74,
+        "event": "complete"
+      },
+      {
+        "step": 75,
+        "event": "start"
+      },
+      {
+        "step": 75,
+        "event": "complete"
+      },
+      {
+        "step": 76,
+        "event": "start"
+      },
+      {
+        "step": 76,
+        "event": "complete"
+      },
+      {
+        "step": 77,
+        "event": "start"
+      },
+      {
+        "step": 77,
+        "event": "complete"
+      },
+      {
+        "step": 78,
+        "event": "start"
+      },
+      {
+        "step": 78,
+        "event": "complete"
+      },
+      {
+        "step": 79,
+        "event": "start"
+      },
+      {
+        "step": 79,
+        "event": "complete"
+      },
+      {
+        "step": 80,
+        "event": "start"
+      },
+      {
+        "step": 80,
+        "event": "complete"
+      },
+      {
+        "step": 81,
+        "event": "start"
+      },
+      {
+        "step": 81,
+        "event": "complete"
+      },
+      {
+        "step": 82,
+        "event": "start"
+      },
+      {
+        "step": 82,
+        "event": "complete"
+      },
+      {
+        "step": 83,
+        "event": "start"
+      },
+      {
+        "step": 83,
+        "event": "complete"
+      },
+      {
+        "step": 84,
+        "event": "start"
+      },
+      {
+        "step": 84,
+        "event": "complete"
+      },
+      {
+        "step": 85,
+        "event": "start"
+      },
+      {
+        "step": 85,
+        "event": "complete"
+      },
+      {
+        "step": 86,
+        "event": "start"
+      },
+      {
+        "step": 86,
+        "event": "complete"
+      },
+      {
+        "step": 87,
+        "event": "start"
+      },
+      {
+        "step": 87,
+        "event": "complete"
+      },
+      {
+        "step": 88,
+        "event": "start"
+      },
+      {
+        "step": 88,
+        "event": "complete"
+      },
+      {
+        "step": 89,
+        "event": "start"
+      },
+      {
+        "step": 89,
+        "event": "complete"
+      },
+      {
+        "step": 90,
+        "event": "start"
+      },
+      {
+        "step": 90,
+        "event": "complete"
+      },
+      {
+        "step": 91,
+        "event": "start"
+      },
+      {
+        "step": 91,
+        "event": "complete"
+      },
+      {
+        "step": 92,
+        "event": "start"
+      },
+      {
+        "step": 92,
+        "event": "complete"
+      },
+      {
+        "step": 93,
+        "event": "start"
+      },
+      {
+        "step": 93,
+        "event": "complete"
+      },
+      {
+        "step": 94,
+        "event": "start"
+      },
+      {
+        "step": 94,
+        "event": "complete"
+      },
+      {
+        "step": 95,
+        "event": "start"
+      },
+      {
+        "step": 95,
+        "event": "complete"
+      },
+      {
+        "step": 96,
+        "event": "start"
+      },
+      {
+        "step": 96,
+        "event": "complete"
+      },
+      {
+        "step": 97,
+        "event": "start"
+      },
+      {
+        "step": 97,
+        "event": "complete"
+      },
+      {
+        "step": 98,
+        "event": "start"
+      },
+      {
+        "step": 98,
+        "event": "complete"
+      },
+      {
+        "step": 99,
+        "event": "start"
+      },
+      {
+        "step": 99,
+        "event": "complete"
+      },
+      {
+        "step": 100,
+        "event": "start"
+      },
+      {
+        "step": 100,
+        "event": "complete"
+      }
+    ],
+    "losses": []
+  },
+  "saturated": {
+    "source": "mock",
+    "initial": {
+      "totalFunds": 20000,
+      "cityPop": 0,
+      "cityTime": 1,
+      "simCycle": 1,
+      "resPop": 0,
+      "comPop": 0,
+      "indPop": 0,
+      "cityYear": 1900,
+      "cityMonth": 0,
+      "cityTax": 7,
+      "cityScore": 712,
+      "resValve": 179,
+      "comValve": -600,
+      "indValve": 600,
+      "crimeAverage": 0,
+      "pollutionAverage": 0,
+      "trafficAverage": 0,
+      "landValueAverage": 0,
+      "poweredZoneCount": 0,
+      "unpoweredZoneCount": 0,
+      "cashFlow": 0
+    },
+    "final": {
+      "totalFunds": 15358,
+      "cityPop": 3360,
+      "cityTime": 244,
+      "simCycle": 244,
+      "resPop": 96,
+      "comPop": 3,
+      "indPop": 6,
+      "cityYear": 1905,
+      "cityMonth": 1,
+      "cityTax": 7,
+      "cityScore": 712,
+      "resValve": -99,
+      "comValve": 1500,
+      "indValve": 1500,
+      "crimeAverage": 96,
+      "pollutionAverage": 48,
+      "trafficAverage": 69,
+      "landValueAverage": 72,
+      "poweredZoneCount": 11,
+      "unpoweredZoneCount": 0,
+      "cashFlow": -4
+    },
+    "mapSha256": "fb35cd582ec4572f7fbf4948c4cfa7d184e443b169a751eb2ea07e11d4bed345",
+    "rulesActions": [
+      "build:coal:36:51",
+      "build:wire:39:50",
+      "build:wire:40:50",
+      "build:wire:41:50",
+      "build:road:40:46",
+      "build:road:41:46",
+      "build:road:42:46",
+      "build:road:43:46",
+      "build:road:44:46",
+      "build:road:45:46",
+      "build:road:46:46",
+      "build:road:47:46",
+      "build:road:48:46",
+      "build:road:49:46",
+      "build:road:50:46",
+      "build:road:51:46",
+      "build:road:52:46",
+      "build:road:53:46",
+      "build:road:54:46",
+      "build:road:55:46",
+      "build:road:56:46",
+      "build:road:57:46",
+      "build:road:58:46",
+      "build:road:59:46",
+      "build:road:60:46",
+      "build:road:61:46",
+      "build:road:62:46",
+      "build:road:63:46",
+      "build:road:64:46",
+      "build:road:65:46",
+      "build:road:66:46",
+      "build:road:67:46",
+      "build:ind:42:48",
+      "build:ind:45:48",
+      "build:com:48:48",
+      "build:res:51:48",
+      "build:res:54:48",
+      "build:res:57:48",
+      "build:res:60:48",
+      "build:res:63:48",
+      "build:res:66:48",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "build:police:54:51",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait",
+      "wait"
+    ],
+    "rulesDecisions": 100,
+    "rulesCompletedBeforeDrain": true,
+    "beforeDrain": {
+      "maxPending": 2,
+      "maxRecords": 1,
+      "submitted": 100,
+      "accepted": 2,
+      "completed": 0,
+      "pending": 2,
+      "queued": 1,
+      "active": true,
+      "retained": 0,
+      "dropped": 98,
+      "lastDroppedDecision": 100,
+      "evicted": 0,
+      "canceledRequests": 0,
+      "canceled": false
+    },
+    "stats": {
+      "maxPending": 2,
+      "maxRecords": 1,
+      "submitted": 100,
+      "accepted": 2,
+      "completed": 2,
+      "pending": 0,
+      "queued": 0,
+      "active": false,
+      "retained": 1,
+      "dropped": 98,
+      "lastDroppedDecision": 100,
+      "evicted": 1,
+      "canceledRequests": 0,
+      "canceled": false
+    },
+    "summary": {
+      "decisions": 2,
+      "valid": 2,
+      "invalid": 0,
+      "timeouts": 0,
+      "unavailable": 0,
+      "errors": 0,
+      "realInferences": 0,
+      "fallback": 0,
+      "agreementRate": 0,
+      "divergences": 2,
+      "possibleLoops": 0,
+      "unproductiveLoops": 0,
+      "actionsByCategory": {
+        "ind": 2
+      },
+      "blockedByValidator": 0,
+      "latencyMs": {
+        "average": 0,
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    "callbackDecisions": [
+      1,
+      2
+    ],
+    "inferenceEvents": [
+      {
+        "step": 1,
+        "event": "start"
+      },
+      {
+        "step": 1,
+        "event": "complete"
+      },
+      {
+        "step": 2,
+        "event": "start"
+      },
+      {
+        "step": 2,
+        "event": "complete"
+      }
+    ],
+    "losses": [
+      {
+        "decision": 3,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 4,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 5,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 6,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 7,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 8,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 9,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 10,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 11,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 12,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 13,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 14,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 15,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 16,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 17,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 18,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 19,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 20,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 21,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 22,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 23,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 24,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 25,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 26,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 27,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 28,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 29,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 30,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 31,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 32,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 33,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 34,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 35,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 36,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 37,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 38,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 39,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 40,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 41,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 42,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 43,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 44,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 45,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 46,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 47,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 48,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 49,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 50,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 51,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 52,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 53,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 54,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 55,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 56,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 57,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 58,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 59,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 60,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 61,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 62,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 63,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 64,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 65,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 66,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 67,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 68,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 69,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 70,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 71,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 72,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 73,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 74,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 75,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 76,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 77,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 78,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 79,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 80,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 81,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 82,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 83,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 84,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 85,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 86,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 87,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 88,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 89,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 90,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 91,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 92,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 93,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 94,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 95,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 96,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 97,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 98,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 99,
+        "reason": "queue_full"
+      },
+      {
+        "decision": 100,
+        "reason": "queue_full"
+      }
+    ]
+  }
+}

@@ -33,7 +33,15 @@
   let history: Array<{ action: AgentAction; result: string }> = [];
   let failures: string[] = [];
   let shadowSummary = summarizeShadow([]);
-  let shadowObserver = createShadowObserver({ onRecord: (rows) => { shadowSummary = summarizeShadow(rows); } });
+  let shadowState: ReturnType<ReturnType<typeof createShadowObserver>['stats']>;
+  function createPanelObserver() {
+    return createShadowObserver({ maxPending: 32, maxRecords: 200,
+      onRecord: (rows) => { shadowSummary = summarizeShadow(rows); },
+      onState: (state) => { shadowState = state; }
+    });
+  }
+  let shadowObserver = createPanelObserver();
+  shadowState = shadowObserver.stats();
 
   function currentSimulator(): MicropolisSimulator | null {
     return getSimulator?.() ?? null;
@@ -56,7 +64,8 @@
     history = [];
     failures = [];
     shadowObserver.cancel();
-    shadowObserver = createShadowObserver({ onRecord: (rows) => { shadowSummary = summarizeShadow(rows); } });
+    shadowObserver = createPanelObserver();
+    shadowState = shadowObserver.stats();
     shadowSummary = summarizeShadow([]);
     prepared = true;
     refresh();
@@ -216,10 +225,17 @@
 
   <section class="decision shadow">
     <small>JULIA-1 · SHADOW (SEM EXECUÇÃO)</small>
-    <div>{shadowSummary.decisions} avaliadas · {shadowSummary.valid} válidas · {shadowSummary.invalid} inválidas</div>
+    <div>Pendentes: {shadowState.pending}/{shadowState.maxPending} · {shadowState.active ? 'Inferência ativa' : 'Sem inferência ativa'}</div>
+    <div>Histórico: {shadowState.retained} de {shadowState.completed} avaliações · {shadowState.evicted} fora da janela</div>
+    <div>Descartadas por fila cheia: {shadowState.dropped}</div>
+    {#if shadowState.lastDroppedDecision !== null}
+      <div>Último descarte: decisão #{shadowState.lastDroppedDecision}. Rules continua executando.</div>
+    {/if}
+    <div>Métricas das últimas {shadowSummary.decisions} avaliações:</div>
+    <div>{shadowSummary.valid} válidas · {shadowSummary.invalid} inválidas</div>
     <div>{shadowSummary.realInferences} inferências reais · {shadowSummary.timeouts} timeouts · {shadowSummary.errors} erros</div>
     <div>Concordância: {shadowSummary.agreementRate === null ? '—' : Math.round(shadowSummary.agreementRate * 100) + '%'}</div>
-    <div>Loops possíveis: {shadowSummary.possibleLoops} · p95: {fmt(shadowSummary.latencyMs.p95)} ms</div>
+    <div>Loops possíveis: {shadowSummary.possibleLoops} · p95: {shadowSummary.latencyMs.p95 === null ? '—' : fmt(shadowSummary.latencyMs.p95) + ' ms'}</div>
   </section>
 
   {#if history.length}
