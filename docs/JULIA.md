@@ -62,6 +62,28 @@ sugestões não alteram a cidade. O runner exige 100 inferências com IDs distin
 100 válidas e estado final idêntico ao baseline (3360 habitantes, $15358).
 Falhas são gravadas antes de encerrar o benchmark com erro; o simulador continua.
 
+## Limites do shadow
+
+O observer retém até 128 solicitações pendentes (inclui a inferência ativa) e
+512 registros por padrão. O painel usa limites de 32/200. Fila cheia rejeita
+a nova solicitação antes de copiar o snapshot; Rules não aguarda Julia.
+`enqueue` retorna false, `stats()` contabiliza cada descarte e `onDrop` permite
+registrar externamente cada número de decisão rejeitado. Esses descartes não
+são classificados como respostas inválidas do modelo: não houve inferência.
+
+Registros antigos são removidos ao atingir o limite de retenção. Contadores
+de sessão permanecem cumulativos; métricas calculadas por `summarizeShadow`
+cobrem somente a janela retida. O painel mostra ambas as informações e a
+última decisão descartada. A sequência de repetições atravessa a retenção
+sem alterar seus critérios. Cancelar libera a fila e aborta HTTP ativo.
+
+O benchmark padrão de 100 decisões cabe integralmente e exige zero descartes,
+remoções e cancelamentos. Seu resumo inclui `shadowCapacity`; não se pode
+usar métricas de uma janela incompleta para declarar aprovação do benchmark.
+`npm run verify:shadow-capacity` compara dois episódios no WASM real, um rápido
+e outro com shadow artificialmente bloqueado. É mock de inferência, não Julia
+real; verifica preservação das ações Rules, snapshot e mapa mesmo sob saturação.
+
 Resultados reais ficam em `artifacts/julia-real/`; o comando de teste
 `npm run verify:julia-shadow:mock` grava exclusivamente `artifacts/julia-mock/`.
 Métricas misturadas causam erro. CI testa o mock explicitamente e os casos de

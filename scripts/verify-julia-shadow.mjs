@@ -18,7 +18,7 @@ const smoke = live ? await smokeJulia(endpoint) : null;
 const { simulator, runtime } = await createHarness();
 const m = simulator.micropolis;
 const observer = createShadowObserver({ source: live ? 'real' : 'mock', decider: live
-  ? (snapshot, candidates, memory) => decideJulia(snapshot, candidates, memory, { endpoint })
+  ? (snapshot, candidates, memory, options) => decideJulia(snapshot, candidates, memory, { ...options, endpoint })
   : async (snapshot, candidates) => {
       const tool = [['res', snapshot.resValve], ['com', snapshot.comValve], ['ind', snapshot.indValve]].sort((a,b)=>b[1]-a[1])[0][0];
       const candidate = candidates.find(item => item.action.tool === tool) ?? candidates.find(item=>item.id==='wait');
@@ -72,6 +72,11 @@ try {
   const rulesCompletedBeforeShadow = observer.records().length < 100;
   await observer.drain();
   const rows = observer.records();
+  const shadowCapacity = observer.stats();
+  assert.equal(shadowCapacity.dropped, 0, 'Benchmark cannot omit requests due to capacity');
+  assert.equal(shadowCapacity.evicted, 0, 'Benchmark must retain complete decision evidence');
+  assert.equal(shadowCapacity.canceledRequests, 0, 'Benchmark cannot contain canceled requests');
+  assert.equal(shadowCapacity.pending, 0, 'Benchmark must drain all accepted requests');
   assert.equal(rows.length, 100);
   assert.equal(rulesMemory.step, 100);
   const final = runtime.readSnapshot(simulator);
@@ -85,7 +90,7 @@ try {
   assert.equal(final.cityPop, 3360);
   assert.equal(final.totalFunds, 15358);
   const output = { source: live ? 'real' : 'mock', provenance: smoke?.provenance, rulesCompletedBeforeShadow, model: live ? 'SupersonicLabs/Julia-1' : 'Julia-1 deterministic test mock', executor: 'Rules only', seed: 42,
-    decisions: rulesMemory.step, initial, final, checkpoints, summary, rows };
+    decisions: rulesMemory.step, initial, final, checkpoints, summary, shadowCapacity, rows };
   const dir = live ? 'artifacts/julia-real' : 'artifacts/julia-mock';
   await mkdir(resolve(dir), { recursive: true });
   await writeFile(resolve(dir, 'decisions.jsonl'), rows.map((row) => JSON.stringify(row)).join('\n') + '\n');
@@ -97,5 +102,6 @@ try {
     assert.equal(summary.valid, 100);
   }
 } finally {
+  observer.cancel();
   simulator.dispose();
 }
