@@ -41,3 +41,36 @@ O comando **agentlab** no console do servidor mostra o ultimo snapshot capturado
 - **M4:** episodios, rewards auditaveis, validacao de melhora e treinamento fora do processo do jogo.
 
 Nao misturar snapshots passivos M0 com evidencia de agentes que jogaram. Nenhum resultado do Micropolis deve ser rotulado como resultado Mindustry.
+
+## Windows - instalar, abrir e observar com PowerShell
+
+O instalador oficial deste branch [Iniciar-MindustryAgentLab.ps1](windows/Iniciar-MindustryAgentLab.ps1) baixa
+os JARs do Mindustry v160.7, confere seus SHA-256 oficiais, compila o plugin,
+instala o servidor numa pasta isolada, abre o cliente grafico e inicia
+o observador PowerShell que grava JSONL. Se nao houver JDK 17+, baixa uma
+distribuicao portatil do Eclipse Temurin e valida o checksum informado pela API.
+
+Abra **Windows PowerShell** (usuario comum, sem admin) e execute:
+
+```powershell
+$arquivo = Join-Path $env:TEMP 'Iniciar-MindustryAgentLab.ps1'
+Invoke-WebRequest -UseBasicParsing 'https://raw.githubusercontent.com/lloupp/micropolis-agent-lab/feat/mindustry-agent-lab-bootstrap-20261017/mindustry/windows/Iniciar-MindustryAgentLab.ps1' -OutFile $arquivo
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File $arquivo
+```
+
+O servidor inicia automaticamente com o comando `host` (mapa Survival aleatorio),
+sem necessidade de digita-lo. No cliente, abra **Play > Join Game** e conecte
+a `127.0.0.1:6567`. A API do plugin responde em
+`http://127.0.0.1:8766/v1/state`.
+
+Pasta de instalacao: `%LOCALAPPDATA%\MindustryAgentLab`.
+Observacoes: `%LOCALAPPDATA%\MindustryAgentLab\episodes\mindustry-observations.jsonl`.
+
+Opcional: adicione `-NoClient`, `-NoObserver` ou `-InstallOnly` para
+nao abrir a interface, nao abrir o monitor, ou somente instalar, respectivamente.
+`-InstallDir 'D:\MindustryAgentLab'` muda o destino.
+Para parar o servidor, use o comando `exit` em seu console. Fecha-lo nao
+remove a instalacao; execute o mesmo script para reiniciar.
+
+**Limitacao M0:** a API e apenas leitura e nao constitui um agente jogando.
+Somente o servidor e o cliente reais podem validar a comunicacao ao vivo.
