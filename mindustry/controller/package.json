@@ -1,0 +1,9 @@
+{
+  "name": "mindustry-agent-lab-controller",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "observe": "node observe.mjs"
+  }
+}
