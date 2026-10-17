@@ -1,0 +1,43 @@
+name: Mindustry Windows installer
+
+on:
+  push:
+    paths:
+      - 'mindustry/windows/**'
+      - 'mindustry/plugin/**'
+      - '.github/workflows/mindustry-windows.yml'
+  pull_request:
+    paths:
+      - 'mindustry/windows/**'
+      - 'mindustry/plugin/**'
+      - '.github/workflows/mindustry-windows.yml'
+
+jobs:
+  install-powershell:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse in Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          Get-ChildItem mindustry/windows/*.ps1 | ForEach-Object {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) {
+              $errors | Format-List | Out-String | Write-Host
+              throw "PowerShell parser failed: $($_.Name)"
+            }
+          }
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Execute real install-only with download verification and javac
+        shell: powershell
+        run: |
+          & .\mindustry\windows\Iniciar-MindustryAgentLab.ps1 -InstallDir "$env:RUNNER_TEMP\MindustryAgentLab" -InstallOnly -NoClient -NoObserver
+          if (-not (Test-Path "$env:RUNNER_TEMP\MindustryAgentLab\server\config\mods\mindustry-agent-lab-plugin.jar")) {
+            throw 'Plugin missing after Windows setup'
+          }
+          & "$env:JAVA_HOME\bin\jar.exe" tf "$env:RUNNER_TEMP\MindustryAgentLab\server\config\mods\mindustry-agent-lab-plugin.jar" | Select-String -Pattern 'plugin.json'
