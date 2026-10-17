@@ -17,7 +17,6 @@ $Branch = 'feat/mindustry-agent-lab-bootstrap-20261017'
 $MindustryVersion = 'v160.7'
 $VersionAssets = @{
     'server-release.jar' = 'f7b899a4038b95b14a824d5f8993984f79d73baa3254c385b6538327f9c0befd'
-    'dependencies.jar'   = 'b450072f9e642031cc32f2d4f61fd517d4cf6e5c098185ccd20b7fb8d787fa29'
     'Mindustry.jar'      = '36d94941a1639478ad1d9be25a9d802c6f77552f400c6da0338b7b019f63a0d1'
 }
 
@@ -138,7 +137,7 @@ function Compile-Plugin([string]$JdkBin, [string]$SourceRoot, [string]$Dependenc
     Ensure-Directory $classes
     $javaSources = @(Get-ChildItem -LiteralPath $javaDir -Filter '*.java' -File -Recurse | ForEach-Object { $_.FullName })
     if ($javaSources.Count -eq 0) { throw 'Nenhum arquivo .java localizado no plugin.' }
-    Info 'Compilando plugin Java contra Mindustry v160.7...'
+    Info 'Compilando plugin com as classes do servidor Mindustry v160.7...'
     & (Join-Path $JdkBin 'javac.exe') --release 17 -encoding UTF-8 -cp $DependencyJar -d $classes @javaSources
     if ($LASTEXITCODE -ne 0) { throw ('javac falhou: codigo ' + $LASTEXITCODE) }
     $resultJar = Join-Path $buildRoot 'mindustry-agent-lab-plugin.jar'
@@ -164,10 +163,10 @@ try {
 
     $assetBase = 'https://github.com/Anuken/Mindustry/releases/download/' + $MindustryVersion
     $downloads = Join-Path $InstallDir 'downloads'
-    foreach ($name in @('server-release.jar', 'dependencies.jar')) {
+    foreach ($name in @('server-release.jar')) {
         Download-Verified -Uri ($assetBase + '/' + $name) -Destination (Join-Path $downloads $name) -Sha256 $VersionAssets[$name]
     }
-    $pluginJar = Compile-Plugin -JdkBin $jdkBin -SourceRoot $sourceRoot -DependencyJar (Join-Path $downloads 'dependencies.jar')
+    $pluginJar = Compile-Plugin -JdkBin $jdkBin -SourceRoot $sourceRoot -DependencyJar (Join-Path $downloads 'server-release.jar')
     $serverDir = Join-Path $InstallDir 'server'
     $serverJar = Join-Path $serverDir 'server-release.jar'
     Copy-Item -LiteralPath (Join-Path $downloads 'server-release.jar') -Destination $serverJar -Force
