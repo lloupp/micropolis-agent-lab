@@ -102,8 +102,8 @@ ser exposto sem esses controles e testes de integração reais.
 
 ## Validação próxima do PC local (Windows, 2 núcleos, heap limitado)
 
-Consulte [PC_VALIDATION.md](PC_VALIDATION.md) para o teste com servidor Mindustry
-real em Windows PowerShell 5.1, limite de CPU/JVM, duração configurável, opção
-de abrir o cliente gráfico no PC e relatório JSON. O GitHub Actions executa o
-mesmo teste limitado de forma headless e publica evidências, mas não reproduz
-os 8 GB físicos nem a Intel HD 620.
+Consulte [PC_VALIDATION.md](PC_VALIDATION.md) para validar o servidor real
+em **Windows PowerShell 5.1 ou Linux Mint**, com CPU/JVM limitadas,
+benchmark de ticks/latência/memória, opção de abrir o cliente gráfico no PC
+e relatórios JSON. Os workflows GitHub Actions executam testes headless
+independentes em Windows e Ubuntu, sem reproduzir os 8 GB físicos nem a GPU Intel HD 620.

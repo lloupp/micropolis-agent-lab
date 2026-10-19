@@ -73,3 +73,43 @@ No próprio PC, medir FPS, estabilidade do cliente Java com Intel HD 620,
 temperatura/uso da memória compartilhada, desempenho do servidor com cliente
 aberto e recuperação após alguns minutos de gameplay. Esses aspectos não são
 comprováveis apenas no runner GitHub.
+
+## Executar no Linux Mint com seu hardware real
+
+O runner Linux do GitHub utiliza Ubuntu, **não** reproduz a versão gráfica do
+Linux Mint. Para validar realmente os drivers Intel, RAM compartilhada, CPU,
+compositor e FPS, rode o benchmark **no PC físico**.
+
+Requisitos: Python 3.10+, Java JDK 17+, Git e internet na primeira execução.
+Por exemplo, se precisar instalar as dependências no Mint:
+
+    sudo apt update
+    sudo apt install -y openjdk-17-jdk python3 git pciutils
+
+Clone o projeto ou atualize uma cópia existente:
+
+    git clone https://github.com/lloupp/micropolis-agent-lab.git
+    cd micropolis-agent-lab
+    python3 mindustry/linux/test_pc_profile.py --duration 60 --cores 2 --heap-mb 640
+
+O script compila o plugin com o JDK local, verifica SHA-256 do JAR oficial,
+inicia um servidor Mindustry v160.7 real, aplica afinidade de CPU em dois
+processadores permitidos por Linux, coleta snapshots/ticks, latência e pico
+de RSS, e encerra somente seus próprios processos. Dados são gravados em
+~/.local/share/mindustry-agent-lab. Sem sudo ou alterações globais durante o
+teste (após preparar o JDK).
+
+Para abrir o cliente gráfico no Mint durante o mesmo teste:
+
+    python3 mindustry/linux/test_pc_profile.py --duration 120 --cores 2 --heap-mb 640 --with-client
+
+Selecione Play > Join Game > 127.0.0.1:6567 enquanto o teste roda. Isso
+apenas inicia o cliente: **não mede FPS**, nem garante que o jogo e sua
+configuração tenham sido isolados do diretório padrão da aplicação. O script
+encerra o cliente que iniciou ao final. Não utilize essa opção quando tiver
+um jogo pessoal não salvo.
+
+Relatório: ~/.local/share/mindustry-agent-lab/reports/pc-validation-linux.json.
+O workflow Mindustry Linux PC profile publica um artifact JSON análogo, mas
+executa com GPU e RAM reais do runner, não os do seu computador. Os campos
+gpuEmulated=false e totalMachineRamLimitedTo8Gb=false explicitam isso.
