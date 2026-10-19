@@ -1,5 +1,7 @@
 # Desenvolvimento — 10/10/2026
 
+> Atualização de integração (19/10/2026): as PRs #8 e #10 foram mescladas em `main`; esta PR #9 foi reaplicada sobre a `main` atual após o squash da #8, preservando os mesmos 10 arquivos do change-set original. As PRs experimentais #6 e #7 foram encerradas sem merge por falharem nos gates de qualidade da Julia. As referências de branch/base abaixo são o registro histórico de 10/10, não o estado atual. Rules continua único executor; nenhuma melhoria da Julia foi aprovada.
+
 ## Estado e arquitetura
 
 Base deste ciclo: PR #8 `cce789b0db65d070419964215e575fd50d08e9b4`.
