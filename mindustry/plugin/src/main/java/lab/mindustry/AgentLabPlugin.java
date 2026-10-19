@@ -341,7 +341,8 @@ public final class AgentLabPlugin extends Plugin {
         // the build through Mindustry's own construction pipeline.
         core.items.add(Items.copper, 300);
         core.items.add(Items.lead, 200);
-        UnitTypes.poly.spawn(core.team, core.x, core.y);
+        Unit poly = UnitTypes.poly.spawn(core.team, core.x, core.y);
+        poly.controller(new BuilderAI());
         fixtureReady = true;
         Log.info("[AgentLab] CI fixture: Poly spawned; resources granted to core.");
     }
