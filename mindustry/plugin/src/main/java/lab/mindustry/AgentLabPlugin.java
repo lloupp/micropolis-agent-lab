@@ -183,7 +183,8 @@ public final class AgentLabPlugin extends Plugin {
             JsonValue input = new JsonReader().parse(new String(body, StandardCharsets.UTF_8));
             if (!input.isObject() || input.get("id") == null ||
                     input.get("block") == null || input.get("x") == null ||
-                    input.get("y") == null || input.get("rotation") == null) {
+                    input.get("y") == null || input.get("rotation") == null ||
+                    !input.get("id").isString() || !input.get("block").isString()) {
                 throw new IllegalArgumentException("missing_fields");
             }
             String id = input.getString("id");
