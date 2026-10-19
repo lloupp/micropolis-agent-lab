@@ -63,7 +63,7 @@ async function runEpisode(slow) {
         candidates, rulesDecision: rulesChoice, rulesResult: result });
       assert.equal(accepted, !slow || decision <= 2, `Unexpected admission at decision ${decision}`);
       if (!result.ok) failures = [result.message, ...failures].slice(0, 5);
-      memory = advanceMemory(memory, action);
+      memory = advanceMemory(memory, action, result);
       lastActions = [{ actionId: rulesChoice.actionId, result: result.message }, ...lastActions].slice(0, 8);
       previousResult = result.message;
       const beforeTime = m.cityTime;
