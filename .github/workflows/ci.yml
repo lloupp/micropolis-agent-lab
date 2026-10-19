@@ -17,6 +17,7 @@ jobs:
       - run: corepack enable
       - run: npm run setup
       - run: npm run verify:reset
+      - run: npm run verify:cycle
       - run: npm run verify:julia-shadow:mock
       - run: npm run verify:shadow-capacity
       - run: corepack pnpm --filter micropolis check
