@@ -29,6 +29,9 @@ jobs:
               throw "PowerShell parser failed: $($_.Name)"
             }
           }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -36,7 +39,8 @@ jobs:
       - name: Execute real install-only with download verification and javac
         shell: powershell
         run: |
-          & .\mindustry\windows\Iniciar-MindustryAgentLab.ps1 -InstallDir "$env:RUNNER_TEMP\MindustryAgentLab" -InstallOnly -NoClient -NoObserver
+          $ref = if ($env:GITHUB_HEAD_REF) { $env:GITHUB_HEAD_REF } else { $env:GITHUB_REF_NAME }
+          & .\mindustry\windows\Iniciar-MindustryAgentLab.ps1 -InstallDir "$env:RUNNER_TEMP\MindustryAgentLab" -InstallOnly -NoClient -NoObserver -RepositoryRef $ref
           if (-not (Test-Path "$env:RUNNER_TEMP\MindustryAgentLab\server\config\mods\mindustry-agent-lab-plugin.jar")) {
             throw 'Plugin missing after Windows setup'
           }
@@ -69,6 +73,10 @@ jobs:
               Start-Sleep -Seconds 2
             }
             if (-not $ok) { throw 'Mindustry did not expose a ready game snapshot' }
+            # This CLI is read-only. Check game tick progress and the live core,
+            # not merely an HTTP status or a fabricated mock snapshot.
+            & node .\mindustry\controller\readiness-check.mjs
+            if ($LASTEXITCODE -ne 0) { throw 'M1 read-only readiness preflight failed' }
           } finally {
             if ($process -and -not $process.HasExited) {
               Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue

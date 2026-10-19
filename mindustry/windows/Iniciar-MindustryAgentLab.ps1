@@ -5,7 +5,8 @@ param(
     [string]$InstallDir = (Join-Path $env:LOCALAPPDATA 'MindustryAgentLab'),
     [switch]$InstallOnly,
     [switch]$NoClient,
-    [switch]$NoObserver
+    [switch]$NoObserver,
+    [ValidatePattern('^[A-Za-z0-9][A-Za-z0-9._/-]{0,127}$')][string]$RepositoryRef = 'main'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -13,7 +14,7 @@ $ProgressPreference = 'SilentlyContinue'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 $Repo = 'lloupp/micropolis-agent-lab'
-$Branch = 'feat/mindustry-agent-lab-bootstrap-20261017'
+$Branch = $RepositoryRef
 $MindustryVersion = 'v160.7'
 $VersionAssets = @{
     'server-release.jar' = 'f7b899a4038b95b14a824d5f8993984f79d73baa3254c385b6538327f9c0befd'
