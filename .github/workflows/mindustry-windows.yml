@@ -1,0 +1,78 @@
+name: Mindustry Windows installer
+
+on:
+  push:
+    paths:
+      - 'mindustry/windows/**'
+      - 'mindustry/plugin/**'
+      - '.github/workflows/mindustry-windows.yml'
+  pull_request:
+    paths:
+      - 'mindustry/windows/**'
+      - 'mindustry/plugin/**'
+      - '.github/workflows/mindustry-windows.yml'
+
+jobs:
+  install-powershell:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse in Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          Get-ChildItem mindustry/windows/*.ps1 | ForEach-Object {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) {
+              $errors | Format-List | Out-String | Write-Host
+              throw "PowerShell parser failed: $($_.Name)"
+            }
+          }
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Execute real install-only with download verification and javac
+        shell: powershell
+        run: |
+          & .\mindustry\windows\Iniciar-MindustryAgentLab.ps1 -InstallDir "$env:RUNNER_TEMP\MindustryAgentLab" -InstallOnly -NoClient -NoObserver
+          if (-not (Test-Path "$env:RUNNER_TEMP\MindustryAgentLab\server\config\mods\mindustry-agent-lab-plugin.jar")) {
+            throw 'Plugin missing after Windows setup'
+          }
+          & "$env:JAVA_HOME\bin\jar.exe" tf "$env:RUNNER_TEMP\MindustryAgentLab\server\config\mods\mindustry-agent-lab-plugin.jar" | Select-String -Pattern 'plugin.json'
+
+      - name: Start real server and verify live plugin API
+        shell: powershell
+        run: |
+          $base = Join-Path $env:RUNNER_TEMP 'MindustryAgentLab'
+          $server = Join-Path $base 'server'
+          $stdout = Join-Path $base 'server-stdout.log'
+          $stderr = Join-Path $base 'server-stderr.log'
+          $java = Join-Path $env:JAVA_HOME 'bin\java.exe'
+          $process = Start-Process -FilePath $java -ArgumentList @('-Xms256m', '-Xmx1024m', '-jar', 'server-release.jar', 'host') -WorkingDirectory $server -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
+          try {
+            $ok = $false
+            for ($i = 0; $i -lt 40; $i++) {
+              if ($process.HasExited) { break }
+              try {
+                $health = Invoke-RestMethod -Uri 'http://127.0.0.1:8766/v1/health' -TimeoutSec 2
+                $state = Invoke-RestMethod -Uri 'http://127.0.0.1:8766/v1/state' -TimeoutSec 2
+                if ($health.readOnly -eq $true -and $state.schemaVersion -eq 1 -and $state.ready -eq $true -and $state.width -gt 0) {
+                  $ok = $true
+                  Write-Host ("Live game API: wave={0} tick={1} width={2} height={3}" -f $state.wave, $state.tick, $state.width, $state.height)
+                  break
+                }
+              } catch {
+                # Server and map are still loading.
+              }
+              Start-Sleep -Seconds 2
+            }
+            if (-not $ok) { throw 'Mindustry did not expose a ready game snapshot' }
+          } finally {
+            if ($process -and -not $process.HasExited) {
+              Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+            }
+            if (Test-Path $stdout) { Get-Content $stdout -Tail 80 }
+            if (Test-Path $stderr) { Get-Content $stderr -Tail 25 }
+          }

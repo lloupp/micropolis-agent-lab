@@ -1,0 +1,31 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+    ivy {
+        url = 'https://github.com/'
+        patternLayout {
+            artifact '/[organisation]/[module]/releases/download/[revision]/dependencies.jar'
+        }
+        metadataSources { artifact() }
+    }
+}
+
+dependencies {
+    // Pin the public Mindustry release: the server and the plugin API must match.
+    compileOnly 'Anuken:Mindustry:v160.7'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 17
+    options.encoding = 'UTF-8'
+}
+
+jar {
+    archiveFileName = 'mindustry-agent-lab-plugin.jar'
+    from(rootProject.projectDir) {
+        include 'plugin.json'
+    }
+}
