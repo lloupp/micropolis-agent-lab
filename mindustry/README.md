@@ -1,4 +1,4 @@
-# Mindustry Agent Lab (fase M0)
+# Mindustry Agent Lab (M0 observação + M1 construção autenticada)
 
 Nova integracao **separada** dentro do mesmo repositorio do Micropolis. O codigo antigo permanece intacto.
 
@@ -107,3 +107,57 @@ em **Windows PowerShell 5.1 ou Linux Mint**, com CPU/JVM limitadas,
 benchmark de ticks/latência/memória, opção de abrir o cliente gráfico no PC
 e relatórios JSON. Os workflows GitHub Actions executam testes headless
 independentes em Windows e Ubuntu, sem reproduzir os 8 GB físicos nem a GPU Intel HD 620.
+
+
+## M1 — ordens autenticadas de construção (operador explícito)
+
+No M1, o plugin aceita ordens para conveyor/router/junction somente com token
+MINDUSTRY_AGENT_TOKEN com 32–128 caracteres base64url. Sem token, o servidor
+permanece somente leitura e rejeita POST. O plugin escuta apenas 127.0.0.1.
+Nunca grave o segredo no Git ou logs. Defina-o antes de iniciar o servidor:
+
+Linux Mint:
+
+    export MINDUSTRY_AGENT_TOKEN="$(python3 -c 'import secrets;print(secrets.token_urlsafe(32))')"
+
+Windows PowerShell:
+
+    $bytes = New-Object byte[] 32
+    $rng = [Security.Cryptography.RandomNumberGenerator]::Create()
+    $rng.GetBytes($bytes)
+    $env:MINDUSTRY_AGENT_TOKEN = [Convert]::ToBase64String($bytes).TrimEnd('=').Replace('+','-').Replace('/','_')
+    $rng.Dispose()
+
+Em outro terminal, informe o MESMO token de forma privada e execute
+(com Node 20+, servidor rodando e uma unidade construtora BuilderAI ociosa):
+
+    node mindustry/controller/build.mjs conveyor 20 25 0 --execute
+
+Sem --execute, o cliente não envia nenhuma ordem. A API exige token Bearer
+tanto em POST /v1/build quanto em GET /v1/commands/ID.
+
+Contrato: ID de 1–48 caracteres alfanuméricos, underscore ou hífen;
+blocos permitidos conveyor/router/junction; coordenadas inteiras e rotação
+0–3. HTTP 202 significa enfileirado, nunca construído; HTTP 200 com o
+mesmo ID e conteúdo retorna o status anterior; HTTP 409 se o mesmo ID tiver
+parâmetros diferentes; outras rejeições HTTP são explícitas.
+
+O motor valida posição e recursos na game thread, seleciona uma unidade
+da própria equipe com BuilderAI e envia um BuildPlan normal. GET retorna
+queued, assigned, completed, rejected, canceled ou failed.
+Somente completed significa bloco realmente observado no mapa, construído
+por uma unidade real. Sem construtora, recursos ou local válido: rejected.
+A fila admite 16 ordens e retém até 128 IDs por episódio. Após o limite,
+rejeita novas ordens em vez de perder idempotência ou evidências.
+Novo mapa cancela ordens pendentes e um build sem conclusão pode expirar.
+
+O CI real (mindustry/integration/m1_live.py) usa um cenário de teste
+EXCLUSIVO do GitHub Actions, ativado pela propriedade
+mindustry.agentlab.ciFixture=true, que cria uma Poly genuína com BuilderAI
+e coloca cobre/chumbo no núcleo. Isso prepara o cenário, mas não instala
+o bloco diretamente: o teste exige que a Poly conclua uma construção pelo
+motor original do Mindustry. Esse teste não comprova automação autônoma,
+jogabilidade em GPU Intel HD 620 ou qualidade da estratégia.
+
+Próximo marco M2: implementar escolha autônoma de construções e avaliação
+reproduzível no Mindustry, sem transferir métricas de Micropolis.
