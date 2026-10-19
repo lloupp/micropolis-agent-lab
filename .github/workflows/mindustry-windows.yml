@@ -46,41 +46,26 @@ jobs:
           }
           & "$env:JAVA_HOME\bin\jar.exe" tf "$env:RUNNER_TEMP\MindustryAgentLab\server\config\mods\mindustry-agent-lab-plugin.jar" | Select-String -Pattern 'plugin.json'
 
-      - name: Start real server and verify live plugin API
+      - name: Benchmark real server with PC-like CPU and JVM limits
         shell: powershell
         run: |
           $base = Join-Path $env:RUNNER_TEMP 'MindustryAgentLab'
-          $server = Join-Path $base 'server'
-          $stdout = Join-Path $base 'server-stdout.log'
-          $stderr = Join-Path $base 'server-stderr.log'
-          $java = Join-Path $env:JAVA_HOME 'bin\java.exe'
-          $process = Start-Process -FilePath $java -ArgumentList @('-Xms256m', '-Xmx1024m', '-jar', 'server-release.jar', 'host') -WorkingDirectory $server -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
-          try {
-            $ok = $false
-            for ($i = 0; $i -lt 40; $i++) {
-              if ($process.HasExited) { break }
-              try {
-                $health = Invoke-RestMethod -Uri 'http://127.0.0.1:8766/v1/health' -TimeoutSec 2
-                $state = Invoke-RestMethod -Uri 'http://127.0.0.1:8766/v1/state' -TimeoutSec 2
-                if ($health.readOnly -eq $true -and $state.schemaVersion -eq 1 -and $state.ready -eq $true -and $state.width -gt 0) {
-                  $ok = $true
-                  Write-Host ("Live game API: wave={0} tick={1} width={2} height={3}" -f $state.wave, $state.tick, $state.width, $state.height)
-                  break
-                }
-              } catch {
-                # Server and map are still loading.
-              }
-              Start-Sleep -Seconds 2
-            }
-            if (-not $ok) { throw 'Mindustry did not expose a ready game snapshot' }
-            # This CLI is read-only. Check game tick progress and the live core,
-            # not merely an HTTP status or a fabricated mock snapshot.
-            & node .\mindustry\controller\readiness-check.mjs
-            if ($LASTEXITCODE -ne 0) { throw 'M1 read-only readiness preflight failed' }
-          } finally {
-            if ($process -and -not $process.HasExited) {
-              Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
-            }
-            if (Test-Path $stdout) { Get-Content $stdout -Tail 80 }
-            if (Test-Path $stderr) { Get-Content $stderr -Tail 25 }
+          $report = Join-Path $base 'reports\pc-validation.json'
+          & .\mindustry\windows\Testar-MindustryPC.ps1 -InstallDir $base -DurationSeconds 35 -CpuCores 2 -MaxHeapMb 640 -ReportPath $report
+          $result = Get-Content -LiteralPath $report -Raw | ConvertFrom-Json
+          if ($result.status -ne 'passed' -or $result.results.successfulSamples -lt 20 -or $result.results.tickDelta -le 0) {
+            throw 'PC-like benchmark did not validate real progress'
           }
+          if ($result.restrictions.javaMaxHeapMb -ne 640 -or $result.restrictions.javaActiveProcessorCount -ne 2) {
+            throw 'CPU/JVM test limits were not recorded'
+          }
+          Write-Host ("PC-like live test: {0} samples, {1} ticks, RAM peak {2} MB" -f $result.results.successfulSamples, $result.results.tickDelta, $result.results.peakServerWorkingSetMb)
+
+      - name: Publish PC-profile validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mindustry-windows-pc-profile
+          path: ${{ runner.temp }}/MindustryAgentLab/reports/pc-validation.json
+          if-no-files-found: warn
+          retention-days: 14
