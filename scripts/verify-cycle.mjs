@@ -28,7 +28,7 @@ try {
       assert.ok(!builds.has(key), `repeated construction: ${key}`); builds.add(key);
       assert.ok(m.totalFunds < before.totalFunds, 'construction must debit the engine balance');
     }
-    memory = advanceMemory(memory, action);
+    memory = advanceMemory(memory, action, result);
     assert.equal(memory.step, decision);
     const time = m.cityTime;
     for (let tick = 0; tick < ticksPerDecision; tick++) {
