@@ -10,6 +10,7 @@ import com.sun.net.httpserver.HttpServer;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.content.Items;
+import mindustry.content.UnitTypes;
 import mindustry.entities.units.BuildPlan;
 import mindustry.ai.types.BuilderAI;
 import mindustry.game.EventType.Trigger;
@@ -48,6 +49,10 @@ public final class AgentLabPlugin extends Plugin {
     private volatile String stateJson = "{\"schemaVersion\":1,\"ready\":false}";
     private volatile long episode = 0;
     private int frame;
+    // Fixture disabled in ordinary gameplay, explicitly opt-in for GitHub CI only.
+    private final boolean ciFixture = Boolean.getBoolean("mindustry.agentlab.ciFixture") &&
+        "true".equals(System.getenv("GITHUB_ACTIONS"));
+    private boolean fixtureReady;
     private long updates;
     private HttpServer server;
     private String token;
@@ -59,6 +64,7 @@ public final class AgentLabPlugin extends Plugin {
         volatile String status = "queued";
         volatile String reason = "";
         volatile int unitId = -1;
+        volatile int teamId = -1;
         volatile long assignedAt;
         Command(String id, String blockName, int x, int y, int rotation, long episode) {
             this.id = id; this.blockName = blockName; this.x = x; this.y = y;
@@ -97,11 +103,13 @@ public final class AgentLabPlugin extends Plugin {
                     }
                 }
                 pending.clear();
+                fixtureReady = false;
                 pruneHistory();
             }
         });
         Events.run(Trigger.update, () -> {
             updates++;
+            installCiFixture();
             if (++frame % 30 == 0) stateJson = captureState();
             processQueue();
             confirmPlans();
@@ -116,7 +124,7 @@ public final class AgentLabPlugin extends Plugin {
             server = HttpServer.create(new InetSocketAddress("127.0.0.1", port), 8);
             server.createContext("/v1/health", exchange -> reply(exchange, "GET", 200,
                 "{\"service\":\"mindustry-agent-lab\",\"schemaVersion\":1,\"readOnly\":" +
-                (token == null) + ",\"m1\":true}"));
+                (token == null) + ",\"m1\":true,\"ciFixture\":" + ciFixture + "}"));
             server.createContext("/v1/state", exchange ->
                 reply(exchange, "GET", 200, stateJson));
             server.createContext("/v1/build", this::submitBuild);
@@ -282,6 +290,7 @@ public final class AgentLabPlugin extends Plugin {
         if (builder[0] == null) { reject(command, "no_idle_builder_ai"); return; }
         builder[0].addBuild(new BuildPlan(command.x, command.y, command.rotation, block));
         command.unitId = builder[0].id();
+        command.teamId = core.team.id;
         command.assignedAt = updates;
         command.status = "assigned";
     }
@@ -298,7 +307,7 @@ public final class AgentLabPlugin extends Plugin {
                 Tile tile = Vars.world.tile(command.x, command.y);
                 Block block = blockFor(command.blockName);
                 if (tile != null && block != null && tile.block() == block &&
-                        tile.team() == Vars.state.rules.defaultTeam) {
+                        tile.team().id == command.teamId) {
                     command.status = "completed";
                 } else if (updates - command.assignedAt > BUILD_TIMEOUT_TICKS) {
                     command.status = "failed";
@@ -324,6 +333,19 @@ public final class AgentLabPlugin extends Plugin {
         }
     }
 
+    private void installCiFixture() {
+        if (!ciFixture || fixtureReady || Vars.state == null || !Vars.state.isPlaying()) return;
+        CoreBuild core = Vars.state.teams.playerCores().firstOpt();
+        if (core == null) return;
+        // Genuine game fixture, not a fake tile: Poly must physically complete
+        // the build through Mindustry's own construction pipeline.
+        core.items.add(Items.copper, 300);
+        core.items.add(Items.lead, 200);
+        UnitTypes.poly.spawn(core.team, core.x, core.y);
+        fixtureReady = true;
+        Log.info("[AgentLab] CI fixture: Poly spawned; resources granted to core.");
+    }
+
     private String captureState() {
         if (Vars.state == null || !Vars.state.isGame() || Vars.world == null || Vars.world.width() == 0) {
             return "{\"schemaVersion\":1,\"ready\":false}";
@@ -333,13 +355,29 @@ public final class AgentLabPlugin extends Plugin {
                 "{\"x\":%d,\"y\":%d,\"health\":%d,\"copper\":%d,\"lead\":%d}",
                 core.tile.x, core.tile.y, Math.round(core.health),
                 core.items.get(Items.copper), core.items.get(Items.lead));
+        String suggested = "null";
+        if (core != null) {
+            for (int radius = 3; radius <= 12 && "null".equals(suggested); radius++) {
+                for (int dx = -radius; dx <= radius && "null".equals(suggested); dx++) {
+                    for (int dy = -radius; dy <= radius; dy++) {
+                        int x = core.tile.x + dx, y = core.tile.y + dy;
+                        if (Vars.world.tile(x, y) != null &&
+                                Build.validPlace(Blocks.conveyor, core.team, x, y, 0)) {
+                            suggested = String.format(Locale.ROOT,
+                                "{\"block\":\"conveyor\",\"x\":%d,\"y\":%d,\"rotation\":0}", x, y);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
         return String.format(Locale.ROOT,
                 "{\"schemaVersion\":1,\"ready\":true,\"wave\":%d,\"tick\":%d," +
                 "\"width\":%d,\"height\":%d,\"playing\":%s,\"gameOver\":%s," +
-                "\"won\":%s,\"core\":%s}",
+                "\"won\":%s,\"core\":%s,\"suggestedBuild\":%s}",
                 Vars.state.wave, Math.round(Vars.state.tick), Vars.world.width(),
                 Vars.world.height(), Vars.state.isPlaying(), Vars.state.gameOver,
-                Vars.state.won, coreJson);
+                Vars.state.won, coreJson, suggested);
     }
 
     private static void reply(HttpExchange exchange, String method, int code, String body) throws IOException {
