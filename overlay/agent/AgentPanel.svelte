@@ -114,7 +114,7 @@
     const decisionNumber = memory.step + 1;
     shadowObserver.enqueue({ decision: decisionNumber, snapshot: modelSnapshot, candidates,
       rulesDecision: selectedByRules, rulesResult: result, preparationError });
-    memory = advanceMemory(memory, action);
+    memory = advanceMemory(memory, action, result);
     refresh();
   }
 
