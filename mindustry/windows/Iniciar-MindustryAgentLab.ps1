@@ -6,7 +6,8 @@ param(
     [switch]$InstallOnly,
     [switch]$NoClient,
     [switch]$NoObserver,
-    [ValidatePattern('^[A-Za-z0-9][A-Za-z0-9._/-]{0,127}
+    [ValidatePattern('^[A-Za-z0-9][A-Za-z0-9._/-]{0,127}$')][string]$RepositoryRef = 'main'
+)
 
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
