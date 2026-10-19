@@ -114,7 +114,8 @@
     const decisionNumber = memory.step + 1;
     shadowObserver.enqueue({ decision: decisionNumber, snapshot: modelSnapshot, candidates,
       rulesDecision: selectedByRules, rulesResult: result, preparationError });
-    memory = advanceMemory(memory, action);
+    memory = advanceMemory(memory, action, result);
+    if (action.phase === 'blocked') stop();
     refresh();
   }
 
@@ -158,6 +159,7 @@
 
   function actionLabel(action: AgentAction | null) {
     if (!action) return 'Aguardando';
+    if (action.phase === 'blocked') return 'BLOQUEADO · revisar construções';
     if (action.kind === 'build') {
       return String(action.tool).toUpperCase() + ' @ (' + action.x + ', ' + action.y + ')';
     }

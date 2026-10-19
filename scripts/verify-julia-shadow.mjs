@@ -59,7 +59,7 @@ try {
     };
     observer.enqueue({ decision, snapshot: modelSnapshot, candidates, rulesDecision: rulesChoice, rulesResult: result, preparationError });
     if (!result.ok) failures = [result.message, ...failures].slice(0, 5);
-    rulesMemory = advanceMemory(rulesMemory, rulesAction);
+    rulesMemory = advanceMemory(rulesMemory, rulesAction, result);
     lastActions = [{ actionId: rulesChoice.actionId, result: result.message }, ...lastActions].slice(0, 8);
     previousResult = result.message;
     const beforeTime = m.cityTime;

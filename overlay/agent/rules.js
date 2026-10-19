@@ -1,5 +1,5 @@
 /** @typedef {import('./runtime').AgentAction} AgentAction */
-/** @typedef {{step: number, adaptiveIndex: number, policeBuilt: boolean}} AgentMemory */
+/** @typedef {{step: number, blueprintIndex: number, failedBuildAttempts: number, adaptiveIndex: number, policeBuilt: boolean}} AgentMemory */
 /** @type {AgentAction[]} */
 const blueprint = [];
 
@@ -36,7 +36,7 @@ const adaptiveSites = [[63, 48], [66, 48]];
 export const BLUEPRINT_LENGTH = blueprint.length;
 
 export function makeInitialMemory() {
-  return { step: 0, adaptiveIndex: 0, policeBuilt: false };
+  return { step: 0, blueprintIndex: 0, failedBuildAttempts: 0, adaptiveIndex: 0, policeBuilt: false };
 }
 
 /** @param {import('./runtime').AgentSnapshot} snapshot
@@ -44,8 +44,18 @@ export function makeInitialMemory() {
  * @returns {AgentAction}
  */
 export function decideRules(snapshot, memory) {
-  if (memory.step < blueprint.length) {
-    return blueprint[memory.step];
+  // Count attempts separately from construction progress: a failed build is not completed.
+  // Stop after three failures rather than retrying the same unusable tile indefinitely.
+  if ((memory.failedBuildAttempts ?? 0) >= 3) {
+    return {
+      kind: 'wait',
+      phase: 'blocked',
+      reason: 'Rules bloqueado após três construções malsucedidas; revise o mapa e prepare novamente o laboratório.'
+    };
+  }
+  const blueprintIndex = memory.blueprintIndex ?? memory.step;
+  if (blueprintIndex < blueprint.length) {
+    return blueprint[blueprintIndex];
   }
 
   if (snapshot.totalFunds < 1500 && snapshot.cityTax < 12) {
@@ -99,15 +109,25 @@ export function decideRules(snapshot, memory) {
 
 /** @param {AgentMemory} memory
  * @param {AgentAction} action
+ * @param {import('./runtime').ExecutionResult} result
  * @returns {AgentMemory}
  */
-export function advanceMemory(memory, action) {
+export function advanceMemory(memory, action, result) {
+  if (typeof result?.ok !== 'boolean') {
+    throw new TypeError('advanceMemory requires an explicit ExecutionResult');
+  }
+  const built = action.kind === 'build' && result.ok;
   return {
+    // step counts actual attempts, preserving unique decision IDs even on errors.
     step: memory.step + 1,
-    adaptiveIndex:
-      action.phase === 'adaptive' && action.kind === 'build' && action.tool !== 'police'
-        ? memory.adaptiveIndex + 1
-        : memory.adaptiveIndex,
-    policeBuilt: memory.policeBuilt || (action.kind === 'build' && action.tool === 'police')
+    // Only successful placements count toward the initial city blueprint.
+    blueprintIndex: (memory.blueprintIndex ?? memory.step) +
+      (built && action.phase === 'blueprint' ? 1 : 0),
+    failedBuildAttempts: action.kind !== 'build'
+      ? (memory.failedBuildAttempts ?? 0)
+      : (built ? 0 : (memory.failedBuildAttempts ?? 0) + 1),
+    adaptiveIndex: memory.adaptiveIndex +
+      (built && action.phase === 'adaptive' && action.tool !== 'police' ? 1 : 0),
+    policeBuilt: memory.policeBuilt || (built && action.tool === 'police')
   };
 }
