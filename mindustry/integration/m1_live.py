@@ -62,6 +62,8 @@ def exercise():
     assert code == 409 and conflict["error"] == "idempotency_conflict", (code, conflict)
     code, denied = call("POST", "/v1/build", illegal, authorized=False)
     assert code == 401 and denied["error"] == "unauthorized", (code, denied)
+    code, malformed = call("POST", "/v1/build", {**illegal, "id": 123})
+    assert code == 422 and malformed["error"] == "invalid_command", (code, malformed)
 
     until = time.monotonic() + 25
     site = None
