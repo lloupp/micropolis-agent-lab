@@ -40,6 +40,10 @@ try {
     if (decision % 25 === 0) checkpoints.push({ decisions: decision, ...runtime.readSnapshot(s) });
   }
   const final = runtime.readSnapshot(s);
+  // Frozen all-success Rules baseline; failed-build recovery has its own tests.
+  assert.equal(final.cityPop, 3360, 'baseline population regression');
+  assert.equal(final.totalFunds, 15358, 'baseline funds regression');
+  assert.equal(memory.blueprintIndex >= 39, true, 'blueprint must complete');
   assert.ok(final.cityPop > 0); assert.ok(final.cityTime > initial.cityTime);
   assert.ok(final.simCycle > initial.simCycle);
   for (const population of Object.values(developed)) assert.ok(population > 0, 'all R/C/I must develop');
