@@ -2,8 +2,9 @@
 
 ## Estado e arquitetura
 
-Base: main `e04ce5ab8d6e55d1cf45b63e03ba8ab3026ce6dd`.
-Branch: `fix/julia-sidecar-request-validation`, destinada a main via PR, sem merge.
+Base deste ciclo: PR #8 `cce789b0db65d070419964215e575fd50d08e9b4`.
+Main permanece em `e04ce5ab8d6e55d1cf45b63e03ba8ab3026ce6dd`.
+Branch: `feat/bounded-shadow-observer`, PR dependente da #8, sem merge.
 Laboratório para comparar agentes no Micropolis, voltado a experimentação observável.
 MicropolisCore C++/WASM fixado em `config/upstream.json`; interface Svelte
 aplicada por overlay; Rules determinístico; Julia Python/PyTorch via HTTP local.
@@ -25,47 +26,69 @@ Rules, geração de candidatos, pesos, classificadores ou critérios de aceite.
   impede chamadas da fila cancelada. Cancelamento do chamador não conta como
   timeout no cliente. PyTorch já iniciado pode continuar no serviço.
 - Testes reproduziram as falhas antes das correções e passaram depois delas.
-- `npm run check`: 24 testes JavaScript e 7 Python aprovados, incluindo sockets
+- Fila explícita com admissão antes da cópia do snapshot. Limites padrão:
+  128 solicitações pendentes (inclui ativa), 512 registros retidos. Painel:
+  32 pendentes/200 registros. Rejeição por lotação não bloqueia Rules.
+- Contadores de solicitações submetidas/aceitas/concluídas/descartadas/canceladas,
+  retenção e remoções. Callback `onDrop` entrega cada decisão rejeitada, sem
+  manter uma segunda fila ilimitada. Cancelar libera imediatamente a fila.
+- Painel distingue métricas da janela de totais de sessão; mostra pendências,
+  descartes e último número de decisão descartada. p95 ausente aparece como —.
+- Contagem de repetição consecutiva permanece correta após remoção de registros;
+  callbacks e leitores recebem cópias que não podem corromper evidências internas.
+- Adaptador customizado malformado produz erro recuperável e a fila continua.
+- `npm run check`: 31 testes JavaScript e 7 Python aprovados, incluindo sockets
   HTTP reais com runtime de teste (não inferência Julia).
 - `npm run verify:reset`: passou para todas as 16 fases do motor WASM.
 - `npm run verify:julia-shadow:mock`: 100 decisões/100 sugestões válidas, zero
   inferências reais; Rules final com população 3360, caixa 15358 e cityTime 244.
-  Reexecutado após alteração de cancelamento. Não representa qualidade da Julia.
+  Sem descarte/remoção/cancelamento; capacidade incluída no resumo e verificada
+  pelo runner antes de aceitar o benchmark. Não representa qualidade da Julia.
+- `npm run verify:shadow-capacity`: dois episódios WASM reais com 100 decisões
+  cada; cenário lento admite 2, descarta 98 e retém 1 após remover 1 registro.
+  Rules termina antes de qualquer resposta lenta. As 100 ações, snapshot final
+  e SHA-256 do mapa são idênticos ao cenário rápido. Nenhuma inferência real.
+  Evidência: `docs/evidence/shadow-capacity-2026-10-10.json`.
+- Svelte: zero erros, três avisos em arquivos upstream/configuração.
+- Testes de saturação e retenção: 1.000 rejeições contabilizadas e 1.000
+  avaliações mantendo apenas dois registros, sem interromper memória do modelo.
 
 ## Limitações e auditoria
 
-- `npm run smoke:julia-real` executado: bloqueado por
+- `npm run smoke:julia-real` executado no ciclo anterior: bloqueado por
   `unavailable / connection_error`; sem serviço/checkpoint residente neste ambiente.
   Não há nova medição de qualidade ou latência real da Julia.
-- Testes do ciclo de vida do painel ainda incluem verificações estáticas; uma
-  interação completa no navegador não foi validada neste ciclo.
-- Falhas comprovadas: fila/retensão shadow sem limite; memória Rules avança
+- Interação visual: implementada e verificada por Svelte; navegador não validado.
+  Playwright não encontrou Chromium e a tentativa de instalação falhou com
+  download inválido (`End of central directory record signature not found`).
+  Servidor Vite inicializou, mas isso não comprova o fluxo visual.
+- Falhas comprovadas ainda pendentes: memória Rules avança
   mesmo após construção malsucedida; primeira execução do painel prepara/reset
-  a cidade automaticamente; métricas ausentes aparecem como zero.
-- Risco provável: sessões longas com inferência lenta acumulam snapshots e
-  registros; callbacks copiam todos os registros. Não foi medida exaustão de RAM.
+  a cidade automaticamente.
+- Limites de quantidade foram testados; não houve profiling de consumo de RAM.
 - Integrações: checkout upstream fixado, pesos Julia fixados por revisão/hash e
   CI GitHub Actions. Não há evidência de produção ou migração de dados.
-- UX: falta visibilidade da fila/serviço e exportação de episódios no painel.
+- UX: exportação de episódios e diagnóstico detalhado do serviço seguem pendentes.
   Confiabilidade, segurança de entrada e isolamento foram priorizados neste ciclo.
 
 ## Backlog
 
 | Prioridade | Problema / oportunidade | Solução e impacto | Esforço | Dependência | Aceite e validação |
 | --- | --- | --- | --- | --- | --- |
-| P1 | Shadow acumula fila e registros em sessões longas | Limites explícitos, métricas de pendências e backpressure; reduzir memória sem ocultar perdas | Médio | Preservar completude do benchmark e contagem de falhas | Serviço lento não bloqueia Rules; fila tem teto; toda perda é registrada; benchmark mantém 100 decisões e mesma cidade |
+| Concluído | Shadow acumula fila e registros em sessões longas | Limites explícitos, pendências, contadores e eventos de descarte | Médio | PR #8 | Testes unitários e comparação WASM passaram; benchmark padrão completo |
 | P1 | Julia não seleciona construções plausíveis nas PRs #6/#7 | Próximo experimento com representação factual compacta; medir seleção sem retunar gates | Alto | Serviço Julia real e base experimental isolada | 100 inferências reais pareadas; todos os obrigatórios e pelo menos 3 melhorias passam |
 | P1 | Memória Rules avança após falha de execução | Atualização baseada em ExecutionResult; evitar marcar polícia não construída | Médio | Branch separada; não mudar baseline dos experimentos existentes | Teste de construção falha seguido de nova tentativa; novo baseline WASM registrado |
 | P2 | Preparação inicial substitui cidade sem clareza | Explicitar reset antes de iniciar; proteger cidade do usuário | Médio | Fluxo de preparação/pausa | Teste em navegador com cidade prévia, Iniciar/1 passo/Preparar laboratório |
-| P2 | Painel não mostra fila/serviço nem exporta evidências | Estado de serviço, pendências e exportação JSONL; distinguir ausência de métrica | Médio | Política da fila | Exportação corresponde ao episódio; indisponibilidade visível; sem mistura real/mock |
+| P2 | Exportação e diagnóstico detalhado do serviço incompletos | Exportação JSONL e estados do serviço; fila/janela já implementadas | Médio | Definir exportação completa versus janela | Exportação identifica descartes/remoções e limites; sem mistura real/mock |
 | P2 | Cobertura visual/lifecycle limitada | Testes de interação com request pendente e desmontagem | Médio | Ambiente browser com upstream instalado | Reset/pausa/desmontagem sem callbacks antigos ou erros JS |
 
 ## Retomada
 
 Executar `npm run setup`, `npm run check`, `npm run verify:reset` e
-`npm run verify:julia-shadow:mock`. Para avaliar Julia: instalar com
+`npm run verify:julia-shadow:mock` e `npm run verify:shadow-capacity`. Para avaliar Julia: instalar com
 `npm run julia:setup`, iniciar o sidecar, executar smoke e benchmark reais.
-Próximo ciclo: limitar fila/retensão preservando evidência completa; depois,
-retomar representação espacial numa branch experimental. Merge e produção
+Próximo ciclo: corrigir atualização de memória Rules após falha em branch
+separada, com novo baseline explícito; retomar representação espacial quando
+o serviço Julia real estiver disponível. Merge e produção
 dependem de autorização explícita. Nenhum resultado deste ciclo autoriza Julia
 a executar ações no simulador.
