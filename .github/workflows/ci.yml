@@ -18,5 +18,6 @@ jobs:
       - run: npm run setup
       - run: npm run verify:reset
       - run: npm run verify:julia-shadow:mock
+      - run: npm run verify:shadow-capacity
       - run: corepack pnpm --filter micropolis check
         working-directory: .vendor/MicropolisCore
