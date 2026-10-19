@@ -34,3 +34,15 @@ jobs:
           gradle-version: '8.14.3'
       - run: gradle --no-daemon jar
         working-directory: mindustry/plugin
+
+  m1-real-construction:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Test real authenticated construction by a real Poly BuilderAI unit
+        run: python3 mindustry/integration/m1_live.py
