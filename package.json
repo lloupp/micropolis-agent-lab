@@ -19,6 +19,7 @@
     "smoke": "node scripts/smoke.mjs",
     "julia:setup": "python3 scripts/setup-julia.py",
     "smoke:julia-real": "node scripts/smoke-julia-real.mjs",
-    "verify:julia-shadow:mock": "node scripts/verify-julia-shadow.mjs --mock"
+    "verify:julia-shadow:mock": "node scripts/verify-julia-shadow.mjs --mock",
+    "verify:shadow-capacity": "node scripts/verify-shadow-capacity.mjs"
   }
 }
