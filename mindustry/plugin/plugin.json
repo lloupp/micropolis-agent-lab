@@ -2,6 +2,6 @@
   "name": "mindustry-agent-lab",
   "author": "lloupp",
   "main": "lab.mindustry.AgentLabPlugin",
-  "description": "Read-only local Mindustry state bridge for agent research",
-  "version": "0.1.0"
+  "description": "Loopback read-only state bridge with opt-in token-protected M1 builder orders",
+  "version": "0.2.0"
 }
