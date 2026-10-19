@@ -44,7 +44,7 @@ Nao misturar snapshots passivos M0 com evidencia de agentes que jogaram. Nenhum 
 
 ## Windows - instalar, abrir e observar com PowerShell
 
-O instalador oficial deste branch [Iniciar-MindustryAgentLab.ps1](windows/Iniciar-MindustryAgentLab.ps1) baixa
+O instalador oficial da branch principal [Iniciar-MindustryAgentLab.ps1](windows/Iniciar-MindustryAgentLab.ps1) baixa
 os JARs do Mindustry v160.7, confere seus SHA-256 oficiais, compila o plugin,
 instala o servidor numa pasta isolada, abre o cliente grafico e inicia
 o observador PowerShell que grava JSONL. Se nao houver JDK 17+, baixa uma
@@ -54,7 +54,7 @@ Abra **Windows PowerShell** (usuario comum, sem admin) e execute:
 
 ```powershell
 $arquivo = Join-Path $env:TEMP 'Iniciar-MindustryAgentLab.ps1'
-Invoke-WebRequest -UseBasicParsing 'https://raw.githubusercontent.com/lloupp/micropolis-agent-lab/feat/mindustry-agent-lab-bootstrap-20261017/mindustry/windows/Iniciar-MindustryAgentLab.ps1' -OutFile $arquivo
+Invoke-WebRequest -UseBasicParsing 'https://raw.githubusercontent.com/lloupp/micropolis-agent-lab/main/mindustry/windows/Iniciar-MindustryAgentLab.ps1' -OutFile $arquivo
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File $arquivo
 ```
 
@@ -74,3 +74,28 @@ remove a instalacao; execute o mesmo script para reiniciar.
 
 **Limitacao M0:** a API e apenas leitura e nao constitui um agente jogando.
 Somente o servidor e o cliente reais podem validar a comunicacao ao vivo.
+
+## Preflight verificavel para a fase M1 (ainda somente leitura)
+
+Com o servidor iniciado, execute no repositorio:
+
+```powershell
+node mindustry/controller/readiness-check.mjs
+```
+
+O comando consulta 3 snapshots reais de `127.0.0.1:8766/v1/state`, verifica
+partida Survival ativa, core existente, mapa estável, waves não regressivas e
+avanço de tick. Falha com código não zero quando o jogo está indisponível,
+parado ou inconsistente. **Não envia comandos ao jogo e não é evidência de
+agente jogando**. O workflow de Windows valida o mesmo preflight contra o
+servidor real iniciado na CI, além do build Java e dos testes Node.
+
+A opção `-RepositoryRef` no instalador serve para validar branches de PR na
+CI; por padrão o código é obtido da `main`. No PC do usuário não é necessário
+informar essa opção. O ambiente Windows físico ainda requer validação própria.
+
+A implementação M1 (futura) precisa de: identificadores de ação idempotentes,
+autorização local explícita, fila limitada, execução apenas na thread do jogo
+com uma unidade construtora legal, resultados por ID, rejeição de replay, e
+rollback seguro em caso de reset/partida nova. Nenhum endpoint de escrita deve
+ser exposto sem esses controles e testes de integração reais.
